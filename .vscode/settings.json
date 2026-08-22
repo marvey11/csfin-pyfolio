@@ -1,0 +1,63 @@
+{
+  // --- Python & UV Environment Configuration ---
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/libs/*/src",
+    "${workspaceFolder}/apps/*/src"
+  ],
+  "python.analysis.autoSearchPaths": true,
+  "python.analysis.typeCheckingMode": "strict",
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportMissingTypeStubs": "information"
+  },
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.terminal.activateEnvironment": true,
+
+  // --- Formatting & Linting (Ruff) ---
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports.ruff": "explicit",
+      "source.fixAll.ruff": "explicit"
+    }
+  },
+
+  // Ensure VS Code uses the ruff executable installed in your uv workspace environment
+  "ruff.importStrategy": "fromEnvironment",
+
+  // --- Static Type Checking (Microsoft Mypy Extension) ---
+  "mypy-type-checker.importStrategy": "fromEnvironment",
+  "mypy-type-checker.args": [
+    "--config-file=${workspaceFolder}/pyproject.toml"
+  ],
+
+  // --- Testing (Pytest) ---
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestArgs": [
+    "--import-mode=importlib"
+  ],
+
+  // --- General Productivity & Clean Workspace ---
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+
+  // File Exclusions
+  "files.exclude": {
+    "**/.git": true,
+    "**/.venv": true,
+    "**/.ruff_cache": true,
+    "**/.mypy_cache": true,
+    "**/.pytest_cache": true,
+    "**/__pycache__": true
+  },
+  "search.exclude": {
+    "**/.venv": true,
+    "**/.ruff_cache": true,
+    "**/.mypy_cache": true,
+    "**/.pytest_cache": true
+  }
+}
