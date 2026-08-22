@@ -8,9 +8,9 @@ dependencies = [
     "core",
 ]
 
-[tool.uv.sources]
-core = { workspace = true }
-
 [build-system]
 requires = ["hatchling"] # Or "flit_core", "setuptools"
 build-backend = "hatchling.build"
+
+[tool.uv.sources]
+core = { workspace = true }

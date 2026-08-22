@@ -226,3 +226,9 @@ wheels = [
 name = "stock-worker"
 version = "0.1.0"
 source = { editable = "apps/stock-worker" }
+dependencies = [
+    { name = "config" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "config", editable = "libs/config" }]
