@@ -52,7 +52,7 @@ pythonpath = [
     "apps/stock-worker/src",
     "apps/pyfolio/src"
 ]
-addopts = "--cov=service_framework --cov-report=term-missing --cov-report=xml --cov-report=html"
+addopts = "--cov --cov-report=term-missing --cov-report=xml --cov-report=html"
 
 [tool.coverage.run]
 omit = [
