@@ -42,3 +42,36 @@ def test_from_json_raises_value_error_on_invalid_json(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="Failed to parse configuration JSON"):
         Configuration.from_json(invalid_file)
+
+
+def test_from_json_raises_value_error_on_version_mismatch(tmp_path: Path) -> None:
+    # Setup temporary file with mismatched schema_version
+    config_file = tmp_path / "config.json"
+    data: dict[str, str | int] = {"schema_version": 999, "theme": "dark"}
+    config_file.write_text(json.dumps(data), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Configuration version mismatch"):
+        Configuration.from_json(config_file)
+
+
+def test_get_returns_default_when_key_missing() -> None:
+    config = Configuration()
+    default_value = "default"
+
+    result = config.get("non_existent_key", default=default_value)
+    assert result == default_value
+
+
+def test_get_raises_key_error_when_key_missing_and_no_default() -> None:
+    config = Configuration()
+
+    with pytest.raises(KeyError):
+        config.get("non_existent_key")
+
+
+def test_get_returns_value_when_key_exists() -> None:
+    config = Configuration()
+    config.set("existing_key", "value")
+
+    result = config.get("existing_key")
+    assert result == "value"
