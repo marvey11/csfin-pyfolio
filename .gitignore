@@ -9,6 +9,11 @@ wheels/
 # Virtual environments
 .venv
 
+# PyTest Code Coverage
+.coverage
+coverage.xml
+htmlcov/
+
 # Ignore all personal or tool-generated VS Code files
 .vscode/*
 

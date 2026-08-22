@@ -1,30 +1,44 @@
 from __future__ import annotations
 
+import json
 from typing import TYPE_CHECKING
 
+import pytest
 from config import Configuration
 
 if TYPE_CHECKING:
-    from pytest import MonkeyPatch
+    from pathlib import Path
 
 
-def test_parse_returns_configuration_instance() -> None:
-    """Verify that Configuration.parse() returns an initialized instance."""
-    config = Configuration.parse()
+def test_from_json_loads_valid_file(tmp_path: Path) -> None:
+    # Setup temporary file
+    config_file = tmp_path / "config.json"
+    data: dict[str, str | int] = {"schema_version": 1, "theme": "dark"}
+    config_file.write_text(json.dumps(data), encoding="utf-8")
 
-    assert isinstance(config, Configuration)
+    # Act
+    config = Configuration.from_json(config_file)
+
+    # Assert
+    assert config.config == data
 
 
-def test_parse_with_env_vars(monkeypatch: MonkeyPatch) -> None:
-    """
-    Example test using pytest's built-in monkeypatch fixture to mock environment
-    variables.
-    """
-    # Set fake environment variables if your parse method eventually reads from
-    # os.environ
-    monkeypatch.setenv("APP_ENV", "test")
+def test_from_json_returns_defaults_when_file_missing(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    missing_file = tmp_path / "non_existent.json"
 
-    config = Configuration.parse()
+    config = Configuration.from_json(missing_file)
 
-    # Add assertions matching your implementation
-    assert isinstance(config, Configuration)
+    assert config.config == {}
+    # Check that warning was printed to stderr
+    captured = capsys.readouterr()
+    assert "not found" in captured.err
+
+
+def test_from_json_raises_value_error_on_invalid_json(tmp_path: Path) -> None:
+    invalid_file = tmp_path / "invalid.json"
+    invalid_file.write_text("{ broken json ", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Failed to parse configuration JSON"):
+        Configuration.from_json(invalid_file)
