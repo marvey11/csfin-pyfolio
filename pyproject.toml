@@ -39,10 +39,7 @@ suppress-dummy-args = false
 suppress-none-returning = false # Requires explicit -> None return types
 
 [tool.pytest.ini_options]
-testpaths = [
-    "apps",
-    "libs",
-]
+testpaths = [ "apps", "libs" ]
 python_files = ["test_*.py", "*_test.py"]
 python_functions = ["test_*"]
 addopts = "--cov=apps --cov=libs --cov-report=term-missing --cov-report=xml --cov-report=html"
@@ -52,6 +49,20 @@ branch = true
 source = ["apps", "libs"]
 omit = [
     "*/tests/*",
-    "*/test_*.py",
-    "*_test.py",
+    "*/__init__.py",
+]
+
+[tool.coverage.paths]
+source = [
+    "libs/",
+    "apps/",
+]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
 ]
