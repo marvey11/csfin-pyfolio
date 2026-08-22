@@ -45,16 +45,11 @@ testpaths = [
 ]
 python_files = ["test_*.py", "*_test.py"]
 python_functions = ["test_*"]
-# Add root and members to pythonpath so local packages import seamlessly during tests
-pythonpath = [
-    "libs/config/src",
-    "libs/core/src",
-    "apps/stock-worker/src",
-    "apps/pyfolio/src"
-]
-addopts = "--cov --cov-report=term-missing --cov-report=xml --cov-report=html"
+addopts = "--cov=apps --cov=libs --cov-report=term-missing --cov-report=xml --cov-report=html"
 
 [tool.coverage.run]
+branch = true
+source = ["apps", "libs"]
 omit = [
     "*/tests/*",
     "*/test_*.py",
