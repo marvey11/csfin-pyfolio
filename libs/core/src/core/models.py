@@ -1,4 +1,5 @@
 import re
+from typing import Self
 
 from pydantic import BaseModel, field_validator
 
@@ -48,7 +49,7 @@ class StockMetadata(BaseModel):
             )
         return v
 
-    def update(self, other: StockMetadata) -> None:
+    def update(self, other: Self) -> None:
         """Updates the instance attributes in-place."""
         for key, value in other.model_dump(exclude_none=True).items():
             if key != "isin":
