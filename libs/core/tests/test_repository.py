@@ -10,7 +10,6 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-
 def test_get_existing_stock(populated_repo: JsonStockRepository) -> None:
     # `populated_repo` is injected directly from libs/core/tests/conftest.py
     stock = populated_repo.get("DE0007164600")
