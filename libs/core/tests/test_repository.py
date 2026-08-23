@@ -10,10 +10,6 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-@pytest.fixture
-def repo_path(tmp_path: Path) -> Path:
-    return tmp_path / "stocks.json"
-
 
 def test_get_existing_stock(populated_repo: JsonStockRepository) -> None:
     # `populated_repo` is injected directly from libs/core/tests/conftest.py
@@ -75,14 +71,14 @@ def test_delete_nonexistent_raises_error(populated_repo: JsonStockRepository) ->
 
 
 def test_persistence_across_instances(
-    repo_path: Path, sample_stock_apple: StockMetadata
+    mock_repo_path: Path, sample_stock_apple: StockMetadata
 ) -> None:
     # First instance writes data
-    repo1 = JsonStockRepository(repo_path)
+    repo1 = JsonStockRepository(mock_repo_path)
     repo1.add(sample_stock_apple)
 
     # Second instance (simulating next CLI run) reads from same file
-    repo2 = JsonStockRepository(repo_path)
+    repo2 = JsonStockRepository(mock_repo_path)
     stock = repo2.get("US0378331005")
 
     assert stock is not None
@@ -90,12 +86,12 @@ def test_persistence_across_instances(
 
 
 def test_json_omits_none_fields(
-    empty_repo: JsonStockRepository, repo_path: Path
+    empty_repo: JsonStockRepository, mock_repo_path: Path
 ) -> None:
     stock = StockMetadata(isin="DE0007164600", country_code="DE")
     empty_repo.add(stock)
 
-    json_text = repo_path.read_text()
+    json_text = mock_repo_path.read_text()
     assert '"name"' not in json_text
     assert '"currency_code"' not in json_text
     assert '"country_code": "DE"' in json_text
