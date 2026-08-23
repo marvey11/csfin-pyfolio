@@ -11,7 +11,7 @@ dependencies = [
 ]
 
 [project.scripts]
-stock-worker = "stock_worker:main"
+stock-worker = "stock_worker.main:main"
 
 [build-system]
 requires = ["hatchling"]
