@@ -4,14 +4,14 @@ from typing import Annotated
 import typer
 from config.config import Configuration
 from core.models import StockMetadata
-from core.repository import JsonStockRepository, StockRepository
+from core.repository import (
+    JsonStockRepository,
+    RepositoryCorruptedError,
+    StockRepository,
+)
 
-__author__ = "Marco Wegner"
-__email__ = "673439+marvey11@users.noreply.github.com"
 __version__ = "0.1.0"
-__date__ = "2026-08-22"
 __updated__ = "2026-08-23"
-__license__ = "MIT"
 
 
 app = typer.Typer(
@@ -37,10 +37,19 @@ def version_callback(value: bool) -> None:
 
 
 def get_repository(config_path: Path | None = None) -> StockRepository:
-    """Helper to initialize the repository using Configuration."""
+    """Helper to initialize and validate the repository using Configuration."""
     config = Configuration.from_json()
     stock_metadata_path = Path(str(config.get("stock_metadata_path", None)))
-    return JsonStockRepository(json_path=stock_metadata_path.expanduser())
+    repo = JsonStockRepository(json_path=stock_metadata_path.expanduser())
+
+    # Pre-validate file integrity on initialization
+    try:
+        repo.list_all()
+    except RepositoryCorruptedError as err:
+        typer.secho(f"Format Error: {err}", err=True, fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
+    return repo
 
 
 @app.callback()
@@ -69,6 +78,22 @@ def main_callback(
     pass
 
 
+@app.command(name="list")
+def list_stocks() -> None:
+    """List all stocks currently stored in the repository."""
+    repo = get_repository()
+    stocks = repo.list_all()
+    if not stocks:
+        typer.echo("No stocks found in repository.")
+        return
+
+    for stock in stocks:
+        name_part = f" ({stock.name})" if stock.name else ""
+        country_part = f" [{stock.country_code}]" if stock.country_code else ""
+        currency_part = f" {stock.currency_code}" if stock.currency_code else ""
+        typer.echo(f"- {stock.isin}{name_part}{country_part}{currency_part}")
+
+
 @app.command()
 def add(
     isin: Annotated[str, typer.Argument(help="The ISIN of the stock to add.")],
@@ -78,16 +103,12 @@ def add(
     ] = None,
     country: Annotated[
         str | None,
-        typer.Option(
-            "--country",
-            help="The 2-letter country code (e.g. DE, US, GB).",
-        ),
+        typer.Option("--country", help="The 2-letter country code (e.g. DE, US, GB)."),
     ] = None,
     currency: Annotated[
         str | None,
         typer.Option(
-            "--currency",
-            help="The 3-letter currency code (e.g. EUR, USD, GBP).",
+            "--currency", help="The 3-letter currency code (e.g. EUR, USD, GBP)."
         ),
     ] = None,
 ) -> None:

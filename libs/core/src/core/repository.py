@@ -1,14 +1,23 @@
 import tempfile
+from json import JSONDecodeError
 from pathlib import Path
 from typing import Protocol
 
-from pydantic import TypeAdapter, ValidationError
+from pydantic import TypeAdapter
 
 from .models import StockMetadata
 
 
+class RepositoryCorruptedError(Exception):
+    """Raised when the repository file cannot be parsed or contains invalid JSON."""
+
+    pass
+
+
 class StockRepository(Protocol):
     def get(self, isin: str) -> StockMetadata | None: ...
+
+    def list_all(self) -> list[StockMetadata]: ...
 
     def add(self, stock: StockMetadata) -> None: ...
 
@@ -27,17 +36,26 @@ class JsonStockRepository:
         self._cache: dict[str, StockMetadata] | None = None
 
     def _get_data(self) -> dict[str, StockMetadata]:
-        if self._cache is None:
-            if not self.json_path.exists() or self.json_path.stat().st_size == 0:
+        if self._cache is not None:
+            return self._cache
+
+        if not self.json_path.exists():
+            self._cache = {}
+            return self._cache
+
+        try:
+            content = self.json_path.read_text(encoding="utf-8").strip()
+            if not content:
                 self._cache = {}
-            else:
-                try:
-                    self._cache = StockDictAdapter.validate_json(
-                        self.json_path.read_bytes()
-                    )
-                except ValidationError:
-                    self._cache = {}
-        return self._cache
+                return self._cache
+
+            adapter = TypeAdapter(dict[str, StockMetadata])
+            self._cache = adapter.validate_json(content)
+            return self._cache
+        except (JSONDecodeError, ValueError) as err:
+            raise RepositoryCorruptedError(
+                f"Failed to parse repository file at '{self.json_path}': {err}"
+            ) from err
 
     def _save_data(self) -> None:
         if self._cache is None:

@@ -1,4 +1,9 @@
 from .models import StockMetadata
-from .repository import StockRepository
+from .repository import JsonStockRepository, RepositoryCorruptedError, StockRepository
 
-__all__ = ["StockMetadata", "StockRepository"]
+__all__ = [
+    "JsonStockRepository",
+    "RepositoryCorruptedError",
+    "StockMetadata",
+    "StockRepository",
+]
