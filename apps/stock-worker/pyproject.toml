@@ -6,11 +6,16 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "config",
+    "core",
 ]
 
+[project.scripts]
+stock-worker = "stock_worker:main"
+
 [build-system]
-requires = ["hatchling"] # Or "flit_core", "setuptools"
+requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.uv.sources]
 config = { workspace = true }
+core = { workspace = true }

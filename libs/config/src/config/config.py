@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 from typing import Self
 
-DEFAULT_CONFIG_PATH = Path("~/.codescape/pyfolio.json").expanduser()
+DEFAULT_CONFIG_PATH = Path("~/.codescape/pyfolio/settings.json").expanduser()
 
 
 # Define a more descriptive type alias
