@@ -92,10 +92,7 @@ class JsonStockRepository:
         if stock.isin not in data:
             raise KeyError(f"Stock {stock.isin} not found.")
 
-        updated_stock = data[stock.isin].update(stock)
-        data[stock.isin] = (
-            updated_stock if updated_stock is not None else data[stock.isin]
-        )
+        data[stock.isin].update(stock)
         self._save_data()
 
     def delete(self, isin: str) -> None:

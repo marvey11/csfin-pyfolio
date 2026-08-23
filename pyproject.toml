@@ -19,6 +19,7 @@ members = ["apps/*", "libs/*"]
 
 [tool.ruff]
 line-length = 88
+target-version = "py312"
 
 [tool.ruff.lint]
 select = [
@@ -32,6 +33,24 @@ select = [
     "FA",     # flake8-future-annotations (enforces `from __future__ import annotations`)
     "RUF",    # Ruff-specific rules (includes type-check optimizations)
 ]
+fixable = ["ALL"]
+# S = flake8-bandit (Security checks)
+extend-select = ["S"]
+
+[tool.ruff.lint.per-file-ignores]
+# Allow 'assert' in tests (flake8-bandit rule S101)
+"tests/**/*.py" = ["S101"]
+"**/tests/**/*.py" = ["S101"]
+
+[tool.ruff.format]
+# Use "double" or "single" quotes based on your preference
+quote-style = "double"
+
+# Ensures a trailing comma in multi-line lists/dicts (better for git diffs)
+skip-magic-trailing-comma = false
+
+# This handles the indent style (usually 4 spaces)
+indent-style = "space"
 
 # Strict annotation configuration
 [tool.ruff.lint.flake8-annotations]
