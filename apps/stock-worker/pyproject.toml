@@ -7,6 +7,7 @@ requires-python = ">=3.14"
 dependencies = [
     "config",
     "core",
+    "typer>=0.27.1",
 ]
 
 [project.scripts]
