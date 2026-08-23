@@ -1,8 +1,7 @@
-import sys
-from argparse import ArgumentParser, Namespace
 from pathlib import Path
-from typing import Protocol
+from typing import Annotated
 
+import typer
 from config.config import Configuration
 from core.models import StockMetadata
 from core.repository import JsonStockRepository, StockRepository
@@ -11,156 +10,158 @@ __author__ = "Marco Wegner"
 __email__ = "673439+marvey11@users.noreply.github.com"
 __version__ = "0.1.0"
 __date__ = "2026-08-22"
-__updated__ = "2026-08-22"
+__updated__ = "2026-08-23"
 __license__ = "MIT"
 
 
-class AddArgs(Protocol):
-    isin: str
-    name: str | None
-    country: str | None
-    currency: str | None
+app = typer.Typer(
+    name="stock-worker",
+    help="Stock Worker Application",
+    no_args_is_help=True,
+)
 
 
-class UpdateArgs(Protocol):
-    isin: str
-    name: str | None
-    country: str | None
-    currency: str | None
-
-
-class DeleteArgs(Protocol):
-    isin: str
-
-
-def _get_version_message(short: bool = False) -> str:
-    name = "stock-worker"
+def get_version_message(short: bool = False) -> str:
     template = (
-        "{name} v{version} ({updated})"
+        "stock-worker v{version} ({updated})"
         if short
-        else "This is {name} version {version} (last updated {updated})"
+        else "This is stock-worker version {version} (last updated {updated})"
     )
-    return template.format(name=name, version=__version__, updated=__updated__)
+    return template.format(version=__version__, updated=__updated__)
 
 
-def handle_add(args: Namespace, repo: StockRepository) -> None:
-    stock = StockMetadata(
-        isin=args.isin,
-        name=getattr(args, "name", None),
-        country_code=getattr(args, "country", None),
-        currency_code=getattr(args, "currency", None),
-    )
-    repo.add(stock)
-    print(f"Successfully added stock: {stock.isin}")
+def version_callback(value: bool) -> None:
+    if value:
+        typer.echo(get_version_message(short=True))
+        raise typer.Exit()
 
 
-def handle_update(args: Namespace, repo: StockRepository) -> None:
-    stock = StockMetadata(
-        isin=args.isin,
-        name=getattr(args, "name", None),
-        country_code=getattr(args, "country", None),
-        currency_code=getattr(args, "currency", None),
-    )
-    repo.update(stock)
-    print(f"Successfully updated stock: {stock.isin}")
-
-
-def handle_delete(args: Namespace, repo: StockRepository) -> None:
-    repo.delete(args.isin)
-    print(f"Successfully deleted stock: {args.isin}")
-
-
-def main() -> int:
-
-    print("Starting stock worker app...")
-
+def get_repository(config_path: Path | None = None) -> StockRepository:
+    """Helper to initialize the repository using Configuration."""
     config = Configuration.from_json()
     stock_metadata_path = Path(str(config.get("stock_metadata_path", None)))
+    return JsonStockRepository(json_path=stock_metadata_path.expanduser())
 
-    parser = _setup_cli()
 
-    # Show top-level help if no subcommand or argument was provided
-    if len(sys.argv) == 1:
-        parser.print_help()
-        return 0
+@app.callback()
+def main_callback(
+    version: Annotated[
+        bool | None,
+        typer.Option(
+            "--version",
+            callback=version_callback,
+            is_eager=True,
+            help="Show application version and exit.",
+        ),
+    ] = None,
+    config: Annotated[
+        Path | None,
+        typer.Option(
+            "--config",
+            help="Optional path to configuration file.",
+            exists=True,
+            file_okay=True,
+            dir_okay=False,
+        ),
+    ] = None,
+) -> None:
+    """Global CLI options and entry hook."""
+    pass
 
-    args = parser.parse_args()
 
-    repo = JsonStockRepository(json_path=Path(stock_metadata_path).expanduser())
-
-    # Execute subcommand action with dependency injection
+@app.command()
+def add(
+    isin: Annotated[str, typer.Argument(help="The ISIN of the stock to add.")],
+    name: Annotated[
+        str | None,
+        typer.Option("-n", "--name", help="The name of the stock to add."),
+    ] = None,
+    country: Annotated[
+        str | None,
+        typer.Option(
+            "--country",
+            help="The 2-letter country code (e.g. DE, US, GB).",
+        ),
+    ] = None,
+    currency: Annotated[
+        str | None,
+        typer.Option(
+            "--currency",
+            help="The 3-letter currency code (e.g. EUR, USD, GBP).",
+        ),
+    ] = None,
+) -> None:
+    """Add a stock to the portfolio."""
+    repo = get_repository()
     try:
-        args.handler(args, repo)
+        stock = StockMetadata(
+            isin=isin,
+            name=name,
+            country_code=country,
+            currency_code=currency,
+        )
+        repo.add(stock)
+        typer.echo(f"Successfully added stock: {stock.isin}")
     except (ValueError, KeyError) as err:
-        print(f"Error: {err}", file=sys.stderr)
-        return 1
-
-    print("Finished stock worker app...")
-
-    return 0
+        typer.secho(f"Error: {err}", err=True, fg=typer.colors.RED)
+        raise typer.Exit(code=1)
 
 
-def _setup_cli() -> ArgumentParser:
-    parser = ArgumentParser(prog="stock-worker", description="Stock Worker")
+@app.command()
+def update(
+    isin: Annotated[str, typer.Argument(help="The ISIN of the stock to update.")],
+    name: Annotated[
+        str | None,
+        typer.Option("-n", "--name", help="The name of the stock to update."),
+    ] = None,
+    country: Annotated[
+        str | None,
+        typer.Option(
+            "--country",
+            help="The 2-letter country code (e.g. DE, US, GB).",
+        ),
+    ] = None,
+    currency: Annotated[
+        str | None,
+        typer.Option(
+            "--currency",
+            help="The 3-letter currency code (e.g. EUR, USD, GBP).",
+        ),
+    ] = None,
+) -> None:
+    """Update a stock in the portfolio."""
+    repo = get_repository()
+    try:
+        stock = StockMetadata(
+            isin=isin,
+            name=name,
+            country_code=country,
+            currency_code=currency,
+        )
+        repo.update(stock)
+        typer.echo(f"Successfully updated stock: {stock.isin}")
+    except (ValueError, KeyError) as err:
+        typer.secho(f"Error: {err}", err=True, fg=typer.colors.RED)
+        raise typer.Exit(code=1)
 
-    subparsers = parser.add_subparsers(
-        title="sub-commands", dest="command", required=True, metavar="COMMAND"
-    )
 
-    parser.add_argument(
-        "--version", action="version", version=_get_version_message(True)
-    )
-    parser.add_argument(
-        "--config",
-        type=Path,
-        help="Optional path to the configuration file to override the default location",
-        default=None,
-    )
+@app.command()
+def delete(
+    isin: Annotated[str, typer.Argument(help="The ISIN of the stock to delete.")],
+) -> None:
+    """Delete a stock from the portfolio."""
+    repo = get_repository()
+    try:
+        repo.delete(isin)
+        typer.echo(f"Successfully deleted stock: {isin}")
+    except (ValueError, KeyError) as err:
+        typer.secho(f"Error: {err}", err=True, fg=typer.colors.RED)
+        raise typer.Exit(code=1)
 
-    add_parser = subparsers.add_parser("add", help="Add a stock to the portfolio")
-    add_parser.add_argument("isin", type=str, help="The ISIN of the stock to add")
-    add_parser.add_argument(
-        "-n", "--name", type=str, help="The name of the stock to add"
-    )
-    add_parser.add_argument(
-        "--country",
-        type=str,
-        help="The 2-letter country code of the stock's home country, e.g. DE, US, GB",
-    )
-    add_parser.add_argument(
-        "--currency",
-        type=str,
-        help="The 3-letter currency code of the stock to add, e.g. EUR, USD, GBP",
-    )
-    add_parser.set_defaults(handler=handle_add)
 
-    update_parser = subparsers.add_parser(
-        "update", help="Update a stock in the portfolio"
-    )
-    update_parser.add_argument("isin", type=str, help="The ISIN of the stock to update")
-    update_parser.add_argument(
-        "-n", "--name", type=str, help="The name of the stock to update"
-    )
-    update_parser.add_argument(
-        "--country",
-        type=str,
-        help="The 2-letter country code of the stock's home country, e.g. DE, US, GB",
-    )
-    update_parser.add_argument(
-        "--currency",
-        type=str,
-        help="The 3-letter currency code of the stock to update, e.g. EUR, USD, GBP",
-    )
-    update_parser.set_defaults(handler=handle_update)
-
-    delete_parser = subparsers.add_parser(
-        "delete", help="Delete a stock from the portfolio"
-    )
-    delete_parser.add_argument("isin", type=str, help="The ISIN of the stock to delete")
-    delete_parser.set_defaults(handler=handle_delete)
-
-    return parser
+def main() -> None:
+    app()
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
