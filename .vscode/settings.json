@@ -1,8 +1,10 @@
 {
   // --- Python & UV Environment Configuration ---
   "python.analysis.extraPaths": [
-    "${workspaceFolder}/libs/*/src",
-    "${workspaceFolder}/apps/*/src"
+    "${workspaceFolder}/libs/config/src",
+    "${workspaceFolder}/libs/core/src",
+    "${workspaceFolder}/apps/pyfolio/src",
+    "${workspaceFolder}/apps/stock-worker/src"
   ],
   "python.analysis.autoSearchPaths": true,
   "python.analysis.typeCheckingMode": "strict",

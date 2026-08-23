@@ -17,7 +17,9 @@ def test_cli_add_stock_success(mock_repo: JsonStockRepository) -> None:
     assert mock_repo.get("DE0007164600") is not None
 
 
-def test_cli_add_invalid_isin() -> None:
+def test_cli_add_invalid_isin(mock_repo: JsonStockRepository) -> None:
     result = runner.invoke(app, ["add", "INVALID_ISIN"])
+
     assert result.exit_code == 1
-    assert "Error:" in result.stderr
+    # CliRunner captures application output in stdout/output
+    assert "Error:" in result.output
