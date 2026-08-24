@@ -38,7 +38,7 @@ def test_cli_list_corrupted_json(mock_repo_path: Path) -> None:
 def test_cli_list_empty(empty_repo: JsonStockRepository) -> None:
     result = runner.invoke(app, ["list"])
     assert result.exit_code == 0
-    assert "No stocks found in repository." in result.output
+    assert "No matching stocks found." in result.output
 
 
 def test_cli_list_populated(populated_repo: JsonStockRepository) -> None:

@@ -1,5 +1,9 @@
 from .models import StockMetadata
-from .repository import JsonStockRepository, RepositoryCorruptedError, StockRepository
+from .repository import (
+    JsonStockRepository,
+    RepositoryCorruptedError,
+    StockRepository,
+)
 from .services import StockService
 
 __all__ = [

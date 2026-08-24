@@ -5,17 +5,11 @@ from typing import Annotated
 import typer
 from config.config import Configuration
 from core.models import StockMetadata
-from core.repository import (
-    JsonStockRepository,
-    RepositoryCorruptedError,
-    StockRepository,
-)
-from core.services import (
-    StockService,
-)
+from core.repository import JsonStockRepository, RepositoryCorruptedError
+from core.services import StockService
 
 __version__ = "0.1.0"
-__updated__ = "2026-08-23"
+__updated__ = "2026-08-24"
 
 
 def main() -> None:
@@ -50,33 +44,26 @@ def version_callback(value: bool) -> None:
         raise typer.Exit()
 
 
-def get_repository(config_path: Path | None = None) -> StockRepository:
-    """Initialize and validate the repository using Configuration."""
-    if config_path:
-        config = Configuration.from_json(config_path)
-    else:
-        config = Configuration.from_json()
-
+def get_service(config_path: Path | None = None) -> StockService:
+    """Instantiate Configuration, JsonStockRepository, and StockService."""
+    config = (
+        Configuration.from_json(config_path)
+        if config_path
+        else Configuration.from_json()
+    )
     stock_metadata_path = Path(str(config.get("stock_metadata_path", "")))
     repo = JsonStockRepository(json_path=stock_metadata_path.expanduser())
 
     try:
-        repo.list_all()
+        return StockService(repo)
     except RepositoryCorruptedError as err:
         typer.secho(f"Format Error: {err}", err=True, fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
-    return repo
-
-
-def get_service(config_path: Path | None = None) -> StockService:
-    """Helper to construct the StockService layer."""
-    repo = get_repository(config_path)
-    return StockService(repo)
-
 
 @app.callback()
 def main_callback(
+    ctx: typer.Context,
     version: Annotated[
         bool | None,
         typer.Option(
@@ -98,16 +85,29 @@ def main_callback(
     ] = None,
 ) -> None:
     """Global CLI options and entry hook."""
-    pass
+    ctx.obj = {"config_path": config}
 
 
 @app.command(name="list")
-def list_stocks() -> None:
-    """List all stocks currently stored in the repository."""
-    repo = get_repository()
-    stocks = repo.list_all()
+def list_stocks(
+    ctx: typer.Context,
+    query: Annotated[
+        str | None,
+        typer.Option("--query", "-q", help="Filter by ISIN or name substring"),
+    ] = None,
+    country: Annotated[
+        str | None,
+        typer.Option("--country", help="Filter by country code (e.g. DE, US)"),
+    ] = None,
+) -> None:
+    """List stocks with optional search and country filtering."""
+    config_path: Path | None = ctx.obj.get("config_path") if ctx.obj else None
+    service = get_service(config_path)
+
+    stocks = service.list_stocks(query=query, country_code=country)
+
     if not stocks:
-        typer.echo("No stocks found in repository.")
+        typer.echo("No matching stocks found.")
         return
 
     for stock in stocks:
@@ -119,6 +119,7 @@ def list_stocks() -> None:
 
 @app.command()
 def add(
+    ctx: typer.Context,
     isin: Annotated[str, typer.Argument(help="The ISIN of the stock to add.")],
     name: Annotated[
         str | None,
@@ -136,7 +137,9 @@ def add(
     ] = None,
 ) -> None:
     """Add a stock to the portfolio."""
-    repo = get_repository()
+    config_path: Path | None = ctx.obj.get("config_path") if ctx.obj else None
+    service = get_service(config_path)
+
     try:
         stock = StockMetadata(
             isin=isin,
@@ -144,7 +147,7 @@ def add(
             country_code=country,
             currency_code=currency,
         )
-        repo.add(stock)
+        service.add_stock(stock)
         typer.echo(f"Successfully added stock: {stock.isin}")
     except (ValueError, KeyError) as err:
         typer.secho(f"Error: {err}", err=True, fg=typer.colors.RED)
@@ -153,6 +156,7 @@ def add(
 
 @app.command()
 def update(
+    ctx: typer.Context,
     isin: Annotated[str, typer.Argument(help="The ISIN of the stock to update.")],
     name: Annotated[
         str | None,
@@ -174,7 +178,9 @@ def update(
     ] = None,
 ) -> None:
     """Update a stock in the portfolio."""
-    repo = get_repository()
+    config_path: Path | None = ctx.obj.get("config_path") if ctx.obj else None
+    service = get_service(config_path)
+
     try:
         stock = StockMetadata(
             isin=isin,
@@ -182,7 +188,7 @@ def update(
             country_code=country,
             currency_code=currency,
         )
-        repo.update(stock)
+        service.update_stock(stock)
         typer.echo(f"Successfully updated stock: {stock.isin}")
     except (ValueError, KeyError) as err:
         typer.secho(f"Error: {err}", err=True, fg=typer.colors.RED)
@@ -191,12 +197,15 @@ def update(
 
 @app.command()
 def delete(
+    ctx: typer.Context,
     isin: Annotated[str, typer.Argument(help="The ISIN of the stock to delete.")],
 ) -> None:
     """Delete a stock from the portfolio."""
-    repo = get_repository()
+    config_path: Path | None = ctx.obj.get("config_path") if ctx.obj else None
+    service = get_service(config_path)
+
     try:
-        repo.delete(isin)
+        service.delete_stock(isin)
         typer.echo(f"Successfully deleted stock: {isin}")
     except (ValueError, KeyError) as err:
         typer.secho(f"Error: {err}", err=True, fg=typer.colors.RED)

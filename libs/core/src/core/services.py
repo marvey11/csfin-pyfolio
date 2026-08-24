@@ -6,6 +6,9 @@ class StockService:
     """Core domain service managing stock operations and query filtering."""
 
     def __init__(self, repository: StockRepository) -> None:
+        # Validate repository integrity on creation
+        repository.list_all()
+
         self.repository = repository
 
     def list_stocks(
@@ -21,13 +24,7 @@ class StockService:
 
         if query:
             q = query.strip().lower()
-            stocks = [
-                s
-                for s in stocks
-                if q in s.isin.lower()
-                or q in s.name.lower()
-                or (s.ticker and q in s.ticker.lower())
-            ]
+            stocks = [s for s in stocks if q in s.isin.lower() or q in s.name.lower()]
 
         return stocks
 
