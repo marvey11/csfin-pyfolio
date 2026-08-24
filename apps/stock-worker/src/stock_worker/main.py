@@ -1,3 +1,4 @@
+import datetime as dt
 from pathlib import Path
 from typing import Annotated
 
@@ -12,6 +13,16 @@ from core.repository import (
 
 __version__ = "0.1.0"
 __updated__ = "2026-08-23"
+
+
+def main() -> None:
+    typer.echo(get_version_message())
+    typer.echo(f"Starting up -- {dt.datetime.now().strftime('%x %X')}")
+
+    try:
+        app()
+    finally:
+        typer.echo(f"Shutting down -- {dt.datetime.now().strftime('%x %X')}")
 
 
 app = typer.Typer(
@@ -178,10 +189,6 @@ def delete(
     except (ValueError, KeyError) as err:
         typer.secho(f"Error: {err}", err=True, fg=typer.colors.RED)
         raise typer.Exit(code=1)
-
-
-def main() -> None:
-    app()
 
 
 if __name__ == "__main__":
