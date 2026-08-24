@@ -10,6 +10,9 @@ from core.repository import (
     RepositoryCorruptedError,
     StockRepository,
 )
+from core.services import (
+    StockService,
+)
 
 __version__ = "0.1.0"
 __updated__ = "2026-08-23"
@@ -48,12 +51,15 @@ def version_callback(value: bool) -> None:
 
 
 def get_repository(config_path: Path | None = None) -> StockRepository:
-    """Helper to initialize and validate the repository using Configuration."""
-    config = Configuration.from_json()
-    stock_metadata_path = Path(str(config.get("stock_metadata_path", None)))
+    """Initialize and validate the repository using Configuration."""
+    if config_path:
+        config = Configuration.from_json(config_path)
+    else:
+        config = Configuration.from_json()
+
+    stock_metadata_path = Path(str(config.get("stock_metadata_path", "")))
     repo = JsonStockRepository(json_path=stock_metadata_path.expanduser())
 
-    # Pre-validate file integrity on initialization
     try:
         repo.list_all()
     except RepositoryCorruptedError as err:
@@ -61,6 +67,12 @@ def get_repository(config_path: Path | None = None) -> StockRepository:
         raise typer.Exit(code=1)
 
     return repo
+
+
+def get_service(config_path: Path | None = None) -> StockService:
+    """Helper to construct the StockService layer."""
+    repo = get_repository(config_path)
+    return StockService(repo)
 
 
 @app.callback()
