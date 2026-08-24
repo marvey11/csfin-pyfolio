@@ -24,7 +24,11 @@ class StockService:
 
         if query:
             q = query.strip().lower()
-            stocks = [s for s in stocks if q in s.isin.lower() or q in s.name.lower()]
+            stocks = [
+                s
+                for s in stocks
+                if q in s.isin.lower() or (s.name and q in s.name.lower())
+            ]
 
         return stocks
 
