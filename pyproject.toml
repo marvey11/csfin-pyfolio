@@ -68,7 +68,12 @@ explicit_package_bases = true
 namespace_packages = true
 
 # Ensure mypy finds packages inside src-layout structures if applicable
-# mypy_path = ["libs/*/src", "apps/*/src"]
+mypy_path = [
+    "libs/config/src",
+    "libs/core/src",
+    "apps/stock-worker/src",
+    "apps/pyfolio/src"
+]
 
 # Disallow dynamic typing & ambiguous definitions
 disallow_untyped_calls = true
