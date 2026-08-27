@@ -15,9 +15,6 @@ dev = [
     "ruff>=0.16.4",
 ]
 
-[tool.uv]
-default-members = ["libs/*", "apps/*"]
-
 [tool.uv.workspace]
 members = ["libs/*", "apps/*"]
 

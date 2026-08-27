@@ -20,7 +20,7 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: uv sync --locked --all-extras --dev
+        run: uv sync --locked --all-packages --all-extras --dev
 
       - name: Run Ruff Lint Check
         run: uv run ruff check .
@@ -29,7 +29,7 @@ jobs:
         run: uv run ruff format --check .
 
       - name: MyPy Type-checking
-        run: uv run mypy -p config -p core -p stock_worker -p pyfolio
+        run: uv run --all-packages mypy -p config -p core -p stock_worker -p pyfolio
 
       - name: Run Test Suite
-        run: uv run pytest
+        run: uv run --all-packages pytest
