@@ -8,6 +8,7 @@ dependencies = []
 
 [dependency-groups]
 dev = [
+    "mypy>=2.3.1",
     "pre-commit>=4.6.2",
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
@@ -15,7 +16,7 @@ dev = [
 ]
 
 [tool.uv.workspace]
-members = ["apps/*", "libs/*"]
+members = ["libs/*", "apps/*"]
 
 [tool.ruff]
 line-length = 88
@@ -57,6 +58,35 @@ indent-style = "space"
 ignore-fully-untyped = false
 suppress-dummy-args = false
 suppress-none-returning = false # Requires explicit -> None return types
+
+[tool.mypy]
+# Enable strict mode flags
+strict = true
+
+# Module resolution settings
+explicit_package_bases = true
+namespace_packages = true
+
+# Ensure mypy finds packages inside src-layout structures if applicable
+# mypy_path = ["libs/*/src", "apps/*/src"]
+
+# Disallow dynamic typing & ambiguous definitions
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+
+# Warnings and strict quality checks
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+warn_unreachable = true
+no_implicit_reexport = true
+strict_equality = true
+
+# Treat mypy configuration issues or unused suppressions strictly
+warn_unused_configs = true
 
 [tool.pytest.ini_options]
 testpaths = [ "apps", "libs" ]
