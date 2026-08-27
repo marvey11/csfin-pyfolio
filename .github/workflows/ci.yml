@@ -28,5 +28,8 @@ jobs:
       - name: Run Ruff Format Check
         run: uv run ruff format --check .
 
+      - name: MyPy Type-checking
+        run: uv run mypy -p config -p core -p stock_worker -p pyfolio
+
       - name: Run Test Suite
         run: uv run --all-packages pytest
