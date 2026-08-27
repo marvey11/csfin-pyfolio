@@ -15,8 +15,11 @@ dev = [
     "ruff>=0.16.4",
 ]
 
+[tool.uv]
+default-members = ["libs/*", "apps/*"]
+
 [tool.uv.workspace]
-members = ["apps/*", "libs/*"]
+members = ["libs/*", "apps/*"]
 
 [tool.ruff]
 line-length = 88
