@@ -20,7 +20,7 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: uv sync --locked --all-extras --dev
+        run: uv sync --locked --all-packages --all-extras --dev
 
       - name: Run Ruff Lint Check
         run: uv run ruff check .
