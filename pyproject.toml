@@ -21,18 +21,20 @@ members = ["libs/*", "apps/*"]
 [tool.ruff]
 line-length = 88
 target-version = "py312"
+# Point Ruff to all package source roots in your workspace/monorepo
+src = ["src", "libs/*/src"]
 
 [tool.ruff.lint]
 select = [
-    "E",      # pycodestyle errors
-    "F",      # Pyflakes
-    "I",      # isort (import order)
-    "UP",     # pyupgrade
-    "ANN",    # flake8-annotations (enforces explicit type annotations everywhere)
-    "PYI",    # flake8-pyi (type stub rules)
-    "TCH",    # flake8-type-checking (moves type-only imports into TYPE_CHECKING blocks)
-    "FA",     # flake8-future-annotations (enforces `from __future__ import annotations`)
-    "RUF",    # Ruff-specific rules (includes type-check optimizations)
+    "E",   # pycodestyle errors
+    "F",   # Pyflakes
+    "I",   # isort (import order)
+    "UP",  # pyupgrade
+    "ANN", # flake8-annotations (enforces explicit type annotations everywhere)
+    "PYI", # flake8-pyi (type stub rules)
+    "TCH", # flake8-type-checking (moves type-only imports into TYPE_CHECKING blocks)
+    "FA",  # flake8-future-annotations (enforces `from __future__ import annotations`)
+    "RUF", # Ruff-specific rules (includes type-check optimizations)
 ]
 fixable = ["ALL"]
 # S = flake8-bandit (Security checks)
@@ -68,11 +70,7 @@ explicit_package_bases = true
 namespace_packages = true
 
 # Ensure mypy finds packages inside src-layout structures if applicable
-mypy_path = [
-    "libs/core/src",
-    "apps/app-workers/src",
-    "apps/pyfolio/src"
-]
+mypy_path = ["libs/core/src", "apps/app-workers/src", "apps/pyfolio/src"]
 
 # Disallow dynamic typing & ambiguous definitions
 disallow_untyped_calls = true
@@ -93,7 +91,7 @@ strict_equality = true
 warn_unused_configs = true
 
 [tool.pytest.ini_options]
-testpaths = [ "apps", "libs" ]
+testpaths = ["apps", "libs"]
 python_files = ["test_*.py", "*_test.py"]
 python_functions = ["test_*"]
 addopts = "--cov=apps --cov=libs --cov-report=term-missing --cov-report=xml --cov-report=html"
@@ -101,16 +99,10 @@ addopts = "--cov=apps --cov=libs --cov-report=term-missing --cov-report=xml --co
 [tool.coverage.run]
 branch = true
 source = ["apps", "libs"]
-omit = [
-    "*/tests/*",
-    "*/__init__.py",
-]
+omit = ["*/tests/*", "*/__init__.py"]
 
 [tool.coverage.paths]
-source = [
-    "libs/",
-    "apps/",
-]
+source = ["libs/", "apps/"]
 
 [tool.coverage.report]
 fail_under = 80

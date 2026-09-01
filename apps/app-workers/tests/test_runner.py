@@ -3,8 +3,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from app_workers.stock_worker import app
-from core.models import StockMetadata
 from typer.testing import CliRunner
+
+from core.models import StockMetadata
 
 if TYPE_CHECKING:
     from pathlib import Path
