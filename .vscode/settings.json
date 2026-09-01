@@ -1,65 +1,54 @@
 {
-  // --- Python & UV Environment Configuration ---
-  "python.analysis.extraPaths": [
-    "${workspaceFolder}/libs/config/src",
-    "${workspaceFolder}/libs/core/src",
-    "${workspaceFolder}/apps/pyfolio/src",
-    "${workspaceFolder}/apps/stock-worker/src"
-  ],
-  "python.analysis.autoSearchPaths": true,
-  "python.analysis.typeCheckingMode": "strict",
-  "python.analysis.diagnosticSeverityOverrides": {
-    "reportMissingTypeStubs": "information"
-  },
-  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
-  "python.terminal.activateEnvironment": true,
-
-  // --- Formatting & Linting (Ruff) ---
-  "[python]": {
-    "editor.defaultFormatter": "charliermarsh.ruff",
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-      "source.organizeImports.ruff": "explicit",
-      "source.fixAll.ruff": "explicit"
+    // --- Python & Workspace Configuration ---
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+    "python.analysis.importFormat": "absolute",
+    // --- Testing Configuration (Pytest & uv) ---
+    // Disable legacy unittest runner in favor of pytest
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    // Use the virtualenv's pytest binary dynamically across workspace packages
+    "python.testing.pytestPath": "${workspaceFolder}/.venv/bin/pytest",
+    // Execute pytest from the workspace root so pytest discovers all subpackages cleanly
+    "python.testing.cwd": "${workspaceFolder}",
+    "python.testing.pytestArgs": [
+        // Auto-discover test directories across all workspace members
+        "rootdir=${workspaceFolder}"
+    ],
+    // --- Formatting & Linting (Python / Ruff) ---
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll.ruff": "explicit",
+            "source.organizeImports.ruff": "explicit"
+        }
+    },
+    "ruff.enable": true,
+    "ruff.organizeImports": true,
+    "ruff.fixAll": true,
+    // --- Static Type Checking (Mypy) ---
+    "mypy-type-checker.enable": true,
+    "mypy-type-checker.preferDaemon": true,
+    // --- TOML Configuration (uv & pyproject.toml) ---
+    "[toml]": {
+        "editor.defaultFormatter": "tamasfe.even-better-toml",
+        "editor.formatOnSave": true
+    },
+    "evenBetterToml.formatter.alignEntries": false,
+    "evenBetterToml.schema.enabled": true,
+    // --- Monorepo Exclusions ---
+    "files.watcherExclude": {
+        "**/.venv/**": true,
+        "**/.ruff_cache/**": true,
+        "**/.mypy_cache/**": true,
+        "**/__pycache__/**": true,
+        "**/.pytest_cache/**": true
+    },
+    "search.exclude": {
+        "**/.venv": true,
+        "**/.ruff_cache": true,
+        "**/.mypy_cache": true,
+        "**/__pycache__": true,
+        "**/.pytest_cache": true
     }
-  },
-
-  // Ensure VS Code uses the ruff executable installed in your uv workspace environment
-  "ruff.importStrategy": "fromEnvironment",
-
-  // --- Static Type Checking (Microsoft Mypy Extension) ---
-  "mypy-type-checker.importStrategy": "fromEnvironment",
-  "mypy-type-checker.args": [
-    "--config-file=${workspaceFolder}/pyproject.toml"
-  ],
-
-  // --- Testing (Pytest) ---
-  "python.testing.pytestEnabled": true,
-  "python.testing.unittestEnabled": false,
-  "python.testing.pytestArgs": [
-    "--import-mode=importlib"
-  ],
-
-  // --- General Productivity & Clean Workspace ---
-  "files.autoSave": "afterDelay",
-  "files.autoSaveDelay": 1000,
-  "files.trimTrailingWhitespace": true,
-  "files.insertFinalNewline": true,
-  "files.trimFinalNewlines": true,
-
-  // File Exclusions
-  "files.exclude": {
-    "**/.git": true,
-    "**/.venv": true,
-    "**/.ruff_cache": true,
-    "**/.mypy_cache": true,
-    "**/.pytest_cache": true,
-    "**/__pycache__": true
-  },
-  "search.exclude": {
-    "**/.venv": true,
-    "**/.ruff_cache": true,
-    "**/.mypy_cache": true,
-    "**/.pytest_cache": true
-  }
 }
