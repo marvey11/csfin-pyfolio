@@ -2,14 +2,13 @@ from pathlib import Path
 
 import pytest
 import typer
-from core.repository import RepositoryCorruptedError, StockRepository
-from core.services import StockService
+from core.services.stocks import RepositoryCorruptedError, StockRepository, StockService
 
 
 @pytest.fixture(autouse=True)
 def mock_service(empty_repo: StockRepository, monkeypatch: pytest.MonkeyPatch) -> None:
     """
-    Automatically patches get_service in stock_worker.main to instantiate
+    Automatically patches get_service in app_workers.stock_worker to instantiate
     a StockService backed by the isolated empty_repo fixture.
     """
 
@@ -20,4 +19,4 @@ def mock_service(empty_repo: StockRepository, monkeypatch: pytest.MonkeyPatch) -
             typer.secho(f"Format Error: {err}", err=True, fg=typer.colors.RED)
             raise typer.Exit(code=1)
 
-    monkeypatch.setattr("stock_worker.main.get_service", _fake_get_service)
+    monkeypatch.setattr("app_workers.stock_worker.get_service", _fake_get_service)
