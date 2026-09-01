@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 import typer
+
 from core.services.stocks import RepositoryCorruptedError, StockRepository, StockService
 
 

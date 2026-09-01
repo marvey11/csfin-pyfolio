@@ -1,6 +1,7 @@
 import pytest
-from core.models import StockMetadata
 from pydantic import ValidationError
+
+from core.models import StockMetadata
 
 # ============================================================================
 # ISIN Validation Tests
