@@ -3,10 +3,13 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
-from config.config import Configuration
+from core.config.config import Configuration
 from core.models import StockMetadata
-from core.repository import JsonStockRepository, RepositoryCorruptedError
-from core.services import StockService
+from core.services.stocks import (
+    JsonStockRepository,
+    RepositoryCorruptedError,
+    StockService,
+)
 
 __version__ = "0.1.0"
 __updated__ = "2026-08-24"
@@ -52,6 +55,7 @@ def get_service(config_path: Path | None = None) -> StockService:
         else Configuration.from_json()
     )
     stock_metadata_path = Path(str(config.get("stock_metadata_path", "")))
+    typer.echo(f"Using path: {stock_metadata_path}")
     repo = JsonStockRepository(json_path=stock_metadata_path.expanduser())
 
     try:
@@ -101,6 +105,7 @@ def list_stocks(
     ] = None,
 ) -> None:
     """List stocks with optional search and country filtering."""
+
     config_path: Path | None = ctx.obj.get("config_path") if ctx.obj else None
     service = get_service(config_path)
 

@@ -1,22 +1,23 @@
 [project]
-name = "stock-worker"
+name = "app-workers"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
+authors = [
+    { name = "Marco Wegner", email = "673439+marvey11@users.noreply.github.com" }
+]
 requires-python = ">=3.12"
 dependencies = [
-    "config",
     "core",
-    "typer>=0.27.1",
+    "typer>=0.27.2",
 ]
 
 [project.scripts]
-stock-worker = "stock_worker.main:main"
+stock-worker = "app_workers.stock_worker:main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.uv.sources]
-config = { workspace = true }
 core = { workspace = true }

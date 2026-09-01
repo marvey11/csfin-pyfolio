@@ -6,10 +6,9 @@ updates:
       interval: "weekly"
     ignore:
       # Exclude local workspace packages from external dependency updates
-      - dependency-name: "config"
       - dependency-name: "core"
+      - dependency-name: "app-workers"
       - dependency-name: "pyfolio"
-      - dependency-name: "stock-worker"
 
     groups:
       dev-dependencies:

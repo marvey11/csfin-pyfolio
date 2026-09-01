@@ -1,5 +1,6 @@
 from core.models import StockMetadata
-from core.repository import StockRepository
+
+from .repository import StockRepository
 
 
 class StockService:

@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 from core.models import StockMetadata
-from core.repository import JsonStockRepository
+from core.services.stocks import JsonStockRepository
 
 if TYPE_CHECKING:
     from pathlib import Path

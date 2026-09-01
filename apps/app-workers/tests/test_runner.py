@@ -2,14 +2,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from app_workers.stock_worker import app
 from core.models import StockMetadata
-from stock_worker.main import app
 from typer.testing import CliRunner
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from core.repository import JsonStockRepository
+    from core.services.stocks import JsonStockRepository
 
 runner = CliRunner()
 

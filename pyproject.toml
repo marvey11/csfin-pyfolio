@@ -69,9 +69,8 @@ namespace_packages = true
 
 # Ensure mypy finds packages inside src-layout structures if applicable
 mypy_path = [
-    "libs/config/src",
     "libs/core/src",
-    "apps/stock-worker/src",
+    "apps/app-workers/src",
     "apps/pyfolio/src"
 ]
 
