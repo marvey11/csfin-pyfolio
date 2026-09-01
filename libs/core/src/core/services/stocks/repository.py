@@ -3,8 +3,9 @@ from json import JSONDecodeError
 from pathlib import Path
 from typing import Protocol
 
-from core.models import StockMetadata
 from pydantic import TypeAdapter
+
+from core.models import StockMetadata
 
 
 class RepositoryCorruptedError(Exception):
