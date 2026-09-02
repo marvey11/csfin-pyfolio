@@ -3,16 +3,13 @@ from __future__ import annotations
 import tempfile
 from json import JSONDecodeError
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol
+from typing import Protocol
 from uuid import UUID
 
 from pydantic import TypeAdapter
 
 from core.models import Transaction
 from core.services.stocks.repository import RepositoryCorruptedError
-
-if TYPE_CHECKING:
-    from core.config import Configuration
 
 DEFAULT_TRANSACTIONS_PATH = Path("~/.codescape/pyfolio/transactions.json")
 TransactionListAdapter = TypeAdapter(list[Transaction])
@@ -35,19 +32,8 @@ class TransactionRepository(Protocol):
 class JsonTransactionRepository:
     """Store transactions in a validated JSON array."""
 
-    def __init__(self, json_path: Path | Configuration | None = None) -> None:
-        if isinstance(json_path, Path):
-            path = json_path
-        elif json_path is None:
-            path = DEFAULT_TRANSACTIONS_PATH
-        else:
-            configured_path = json_path.get("transactions.json_path")
-            path = (
-                Path(configured_path)
-                if isinstance(configured_path, str)
-                else DEFAULT_TRANSACTIONS_PATH
-            )
-        self.json_path = path.expanduser().resolve()
+    def __init__(self, json_path: Path) -> None:
+        self.json_path = json_path.expanduser().resolve()
         self._cache: list[Transaction] | None = None
 
     def _get_data(self) -> list[Transaction]:

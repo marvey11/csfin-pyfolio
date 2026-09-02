@@ -57,8 +57,6 @@ class Configuration:
                 f"Corrupted JSON in configuration file: {err}"
             ) from err
 
-        print(f"raw_data: {raw_data}")  # Debugging output
-
         if not isinstance(raw_data, dict):
             raise InvalidConfigurationError("Configuration root must be a JSON object.")
 

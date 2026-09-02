@@ -166,7 +166,7 @@ verify test discovery without executing tests.
 
 ## CI and Pull Requests
 
-Changes targeting `main` are validated by the `build-and-test` job in
+Changes targeting `main` are validated by the `code-quality` job in
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) on pushes and pull requests.
 The workflow uses Python 3.12, installs with `uv sync --locked`, and requires all
 Ruff, mypy, and pytest checks to pass.
