@@ -10,7 +10,7 @@ from core.models import StockMetadata
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from core.services.stocks import JsonStockRepository
+    from core.services import JsonStockRepository
 
 runner = CliRunner()
 
