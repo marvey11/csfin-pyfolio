@@ -1,3 +1,4 @@
+from .config.service import ConfigurationService
 from .stocks.repository import (
     JsonStockRepository,
     RepositoryCorruptedError,
@@ -6,6 +7,7 @@ from .stocks.repository import (
 from .stocks.service import StockService
 
 __all__ = [
+    "ConfigurationService",
     "JsonStockRepository",
     "RepositoryCorruptedError",
     "StockRepository",
