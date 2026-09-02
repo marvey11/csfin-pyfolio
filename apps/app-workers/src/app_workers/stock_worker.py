@@ -3,10 +3,12 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
+from rich.console import Console
 
-from core.config import Configuration
+from core.config import InvalidConfigurationError
 from core.models import StockMetadata
 from core.services import (
+    ConfigurationService,
     JsonStockRepository,
     RepositoryCorruptedError,
     StockService,
@@ -17,13 +19,13 @@ __updated__ = "2026-08-24"
 
 
 def main() -> None:
-    typer.echo(get_version_message())
-    typer.echo(f"Starting up -- {dt.datetime.now().strftime('%x %X')}")
+    console.print(get_version_message())
+    console.print(f"Starting up -- {dt.datetime.now().strftime('%x %X')}")
 
     try:
         app()
     finally:
-        typer.echo(f"Shutting down -- {dt.datetime.now().strftime('%x %X')}")
+        console.print(f"Shutting down -- {dt.datetime.now().strftime('%x %X')}")
 
 
 app = typer.Typer(
@@ -31,6 +33,8 @@ app = typer.Typer(
     help="Stock Worker Application",
     no_args_is_help=True,
 )
+err_console = Console(stderr=True)
+console = Console()
 
 
 def get_version_message(short: bool = False) -> str:
@@ -44,26 +48,32 @@ def get_version_message(short: bool = False) -> str:
 
 def version_callback(value: bool) -> None:
     if value:
-        typer.echo(get_version_message(short=True))
+        console.print(get_version_message(short=True))
         raise typer.Exit()
 
 
 def get_service(config_path: Path | None = None) -> StockService:
-    """Instantiate Configuration, JsonStockRepository, and StockService."""
-    config = (
-        Configuration.from_json(config_path)
-        if config_path
-        else Configuration.from_json()
-    )
-    stock_metadata_path = Path(str(config.get("stock_metadata_path", "")))
-    typer.echo(f"Using path: {stock_metadata_path}")
-    repo = JsonStockRepository(json_path=stock_metadata_path.expanduser())
+    """Load configuration and create a stock service for its repository."""
+    try:
+        config_service = ConfigurationService.load(config_path)
+    except (FileNotFoundError, InvalidConfigurationError) as err:
+        err_console.print(f"[bold red]Configuration Error:[/bold red] {err}")
+        raise typer.Exit(code=1) from err
+
+    stock_metadata_value = config_service.get_value("stock_metadata_path")
+    if not isinstance(stock_metadata_value, str) or not stock_metadata_value.strip():
+        err = "'stock_metadata_path' must be a non-empty string."
+        err_console.print(f"[bold red]Configuration Error:[/bold red] {err}")
+        raise typer.Exit(code=1)
+
+    stock_metadata_path = Path(stock_metadata_value).expanduser()
+    repo = JsonStockRepository(json_path=stock_metadata_path)
 
     try:
         return StockService(repo)
     except RepositoryCorruptedError as err:
-        typer.secho(f"Format Error: {err}", err=True, fg=typer.colors.RED)
-        raise typer.Exit(code=1)
+        err_console.print(f"[bold red]Format Error:[/bold red] {err}")
+        raise typer.Exit(code=1) from err
 
 
 @app.callback()
@@ -113,14 +123,14 @@ def list_stocks(
     stocks = service.list_stocks(query=query, country_code=country)
 
     if not stocks:
-        typer.echo("No matching stocks found.")
+        console.print("No matching stocks found.")
         return
 
     for stock in stocks:
         name_part = f" ({stock.name})" if stock.name else ""
         country_part = f" [{stock.country_code}]" if stock.country_code else ""
         currency_part = f" {stock.currency_code}" if stock.currency_code else ""
-        typer.echo(f"- {stock.isin}{name_part}{country_part}{currency_part}")
+        console.print(f"- {stock.isin}{name_part}{country_part}{currency_part}")
 
 
 @app.command()
@@ -154,10 +164,10 @@ def add(
             currency_code=currency,
         )
         service.add_stock(stock)
-        typer.echo(f"Successfully added stock: {stock.isin}")
+        console.print(f"Successfully added stock: {stock.isin}")
     except (ValueError, KeyError) as err:
-        typer.secho(f"Error: {err}", err=True, fg=typer.colors.RED)
-        raise typer.Exit(code=1)
+        err_console.print(f"[bold red]Error:[/bold red] {err}")
+        raise typer.Exit(code=1) from err
 
 
 @app.command()
@@ -195,10 +205,10 @@ def update(
             currency_code=currency,
         )
         service.update_stock(stock)
-        typer.echo(f"Successfully updated stock: {stock.isin}")
+        console.print(f"Successfully updated stock: {stock.isin}")
     except (ValueError, KeyError) as err:
-        typer.secho(f"Error: {err}", err=True, fg=typer.colors.RED)
-        raise typer.Exit(code=1)
+        err_console.print(f"[bold red]Error:[/bold red] {err}")
+        raise typer.Exit(code=1) from err
 
 
 @app.command()
@@ -212,10 +222,10 @@ def delete(
 
     try:
         service.delete_stock(isin)
-        typer.echo(f"Successfully deleted stock: {isin}")
+        console.print(f"Successfully deleted stock: {isin}")
     except (ValueError, KeyError) as err:
-        typer.secho(f"Error: {err}", err=True, fg=typer.colors.RED)
-        raise typer.Exit(code=1)
+        err_console.print(f"[bold red]Error:[/bold red] {err}")
+        raise typer.Exit(code=1) from err
 
 
 if __name__ == "__main__":
