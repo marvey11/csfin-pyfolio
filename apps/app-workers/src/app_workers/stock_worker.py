@@ -4,9 +4,9 @@ from typing import Annotated
 
 import typer
 
-from core.config.config import Configuration
+from core.config import Configuration
 from core.models import StockMetadata
-from core.services.stocks import (
+from core.services import (
     JsonStockRepository,
     RepositoryCorruptedError,
     StockService,
