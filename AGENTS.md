@@ -6,7 +6,6 @@
 The workspace members are declared in the root `pyproject.toml`:
 
 - `libs/core`: shared domain models, configuration, repositories, and services.
-- `libs/config`: configuration library workspace member.
 - `apps/app-workers`: Typer command-line workers for configuration and stocks.
 - `apps/pyfolio`: the main pyfolio application package.
 
