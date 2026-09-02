@@ -62,8 +62,8 @@ def get_service(config_path: Path | None = None) -> StockService:
 
     stock_metadata_value = config_service.get_value("stock_metadata_path")
     if not isinstance(stock_metadata_value, str) or not stock_metadata_value.strip():
-        err = "'stock_metadata_path' must be a non-empty string."
-        err_console.print(f"[bold red]Configuration Error:[/bold red] {err}")
+        error_message = "'stock_metadata_path' must be a non-empty string."
+        err_console.print(f"[bold red]Configuration Error:[/bold red] {error_message}")
         raise typer.Exit(code=1)
 
     stock_metadata_path = Path(stock_metadata_value).expanduser()
