@@ -25,3 +25,5 @@ htmlcov/
 
 # Ignore local user overrides if created
 .vscode/settings.local.json
+
+.prompts
