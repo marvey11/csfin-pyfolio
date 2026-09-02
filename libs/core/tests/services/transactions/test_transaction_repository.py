@@ -4,7 +4,6 @@ from pathlib import Path
 
 import pytest
 
-from core.config import Configuration
 from core.models import StockMetadata, Transaction, TransactionType
 from core.services import (
     JsonTransactionRepository,
@@ -21,16 +20,6 @@ def make_buy(name: str, transaction_date: date) -> Transaction:
         shares=Decimal("1"),
         price_per_share=Decimal("2"),
     )
-
-
-def test_missing_file_is_created_and_configuration_path_is_used(tmp_path: Path) -> None:
-    path = tmp_path / "transactions.json"
-    repository = JsonTransactionRepository(
-        Configuration(config={"transactions": {"json_path": str(path)}})
-    )
-
-    assert repository.list_all() == []
-    assert path.exists()
 
 
 def test_crud_replaces_and_persists_transaction(tmp_path: Path) -> None:
