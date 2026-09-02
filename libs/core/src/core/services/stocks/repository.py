@@ -32,7 +32,7 @@ StockDictAdapter = TypeAdapter(dict[str, StockMetadata])
 
 class JsonStockRepository:
     def __init__(self, json_path: Path) -> None:
-        self.json_path = json_path
+        self.json_path = json_path.expanduser().resolve()
         self._cache: dict[str, StockMetadata] | None = None
 
     def _get_data(self) -> dict[str, StockMetadata]:
