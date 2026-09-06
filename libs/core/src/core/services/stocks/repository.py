@@ -5,13 +5,8 @@ from typing import Protocol
 
 from pydantic import TypeAdapter
 
+from core.exceptions import RepositoryCorruptedError
 from core.models import StockMetadata
-
-
-class RepositoryCorruptedError(Exception):
-    """Raised when the repository file cannot be parsed or contains invalid JSON."""
-
-    pass
 
 
 class StockRepository(Protocol):

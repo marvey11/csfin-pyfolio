@@ -4,12 +4,12 @@ from typing import TYPE_CHECKING
 
 import pytest
 import typer
-from app_workers.stock_worker import app
 from typer.testing import CliRunner
 
+from app_workers.stock_worker import app
+from core.exceptions import RepositoryCorruptedError
 from core.models import StockMetadata
-from core.services.stocks.repository import RepositoryCorruptedError, StockRepository
-from core.services.stocks.service import StockService
+from core.services import StockRepository, StockService
 
 if TYPE_CHECKING:
     from pathlib import Path

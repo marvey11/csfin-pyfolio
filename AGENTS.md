@@ -153,7 +153,10 @@ uv run pytest --collect-only
 ```
 
 Use `compileall` for a quick Python syntax check and `pytest --collect-only` to
-verify test discovery without executing tests.
+verify test discovery without executing tests. Also check the VS Code Problems
+view with Pylance enabled for every changed Python file and resolve reported
+errors before submitting the change. Pylance diagnostics complement, but do not
+replace, the workspace-wide mypy check.
 
 ## Change Workflow
 

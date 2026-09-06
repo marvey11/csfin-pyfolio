@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 from datetime import date, datetime  # noqa: TC003
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import Decimal
 from enum import StrEnum
 from typing import Annotated
 from uuid import UUID, uuid4
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, model_validator
 
-from .stock_metadata import StockMetadata  # noqa: TC001
+from core.utils import as_money
 
-MONEY_PLACES = Decimal("0.01")
+from .stock_metadata import StockMetadata  # noqa: TC001
 
 
 class TransactionType(StrEnum):
@@ -21,10 +21,6 @@ class TransactionType(StrEnum):
     DIVIDEND = "DIVIDEND"
     SPLIT = "SPLIT"
     SPIN_OFF = "SPIN_OFF"
-
-
-def _money(value: Decimal) -> Decimal:
-    return value.quantize(MONEY_PLACES, rounding=ROUND_HALF_UP)
 
 
 class Transaction(BaseModel):
@@ -65,12 +61,12 @@ class Transaction(BaseModel):
                     object.__setattr__(
                         self,
                         "total_cost",
-                        _money(self.shares * self.price_per_share + self.fees),
+                        as_money(self.shares * self.price_per_share + self.fees),
                     )
             else:
                 gross_total = self.gross_total
                 if gross_total is None:
-                    gross_total = _money(self.shares * self.price_per_share)
+                    gross_total = as_money(self.shares * self.price_per_share)
                     object.__setattr__(
                         self,
                         "gross_total",
@@ -78,7 +74,9 @@ class Transaction(BaseModel):
                     )
                 if self.net_total is None:
                     object.__setattr__(
-                        self, "net_total", _money(gross_total - self.fees - self.taxes)
+                        self,
+                        "net_total",
+                        as_money(gross_total - self.fees - self.taxes),
                     )
         elif self.transaction_type is TransactionType.DIVIDEND:
             if self.eligible_shares is None or self.dividend_per_share is None:
@@ -87,7 +85,7 @@ class Transaction(BaseModel):
                 raise ValueError("fx_rate must be greater than zero")
             gross_total = self.gross_total
             if gross_total is None:
-                gross_total = _money(
+                gross_total = as_money(
                     self.eligible_shares * self.dividend_per_share / self.fx_rate
                 )
                 object.__setattr__(
@@ -96,7 +94,9 @@ class Transaction(BaseModel):
                     gross_total,
                 )
             if self.net_total is None:
-                object.__setattr__(self, "net_total", _money(gross_total - self.taxes))
+                object.__setattr__(
+                    self, "net_total", as_money(gross_total - self.taxes)
+                )
         elif self.transaction_type is TransactionType.SPLIT:
             if self.split_ratio is None or self.split_ratio <= 0:
                 raise ValueError("split_ratio must be greater than zero")
@@ -116,5 +116,5 @@ class Transaction(BaseModel):
         for field_name in ("fees", "taxes", "total_cost", "gross_total", "net_total"):
             value = getattr(self, field_name)
             if value is not None:
-                object.__setattr__(self, field_name, _money(value))
+                object.__setattr__(self, field_name, as_money(value))
         return self

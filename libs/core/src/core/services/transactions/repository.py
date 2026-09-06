@@ -8,8 +8,8 @@ from uuid import UUID
 
 from pydantic import TypeAdapter
 
+from core.exceptions import RepositoryCorruptedError
 from core.models import Transaction
-from core.services.stocks.repository import RepositoryCorruptedError
 
 DEFAULT_TRANSACTIONS_PATH = Path("~/.codescape/pyfolio/transactions.json")
 TransactionListAdapter = TypeAdapter(list[Transaction])

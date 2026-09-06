@@ -12,6 +12,10 @@ class StockService:
 
         self.repository = repository
 
+    def get(self, isin: str) -> StockMetadata | None:
+        """Return the stock identified by ISIN, or ``None`` when absent."""
+        return self.repository.get(isin.strip().upper())
+
     def list_stocks(
         self,
         query: str | None = None,
