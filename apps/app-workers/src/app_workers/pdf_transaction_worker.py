@@ -18,7 +18,7 @@ from parsers.pdf import BankParserRegistry
 from parsers.pdf.banks.scalable import ScalablePDFParser
 
 __version__ = "0.1.0"
-__updated__ = "2026-09-05"
+__updated__ = "2026-09-06"
 
 
 def main() -> None:

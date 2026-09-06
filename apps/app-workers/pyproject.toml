@@ -12,7 +12,6 @@ dependencies = ["core", "parsers", "typer>=0.27.2"]
 [project.scripts]
 config-worker = "app_workers.config_worker:main"
 stock-worker = "app_workers.stock_worker:main"
-transaction-worker = "app_workers.transaction_worker:main"
 pdf-transaction-worker = "app_workers.pdf_transaction_worker:main"
 
 [build-system]
