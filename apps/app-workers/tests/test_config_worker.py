@@ -3,9 +3,9 @@
 from pathlib import Path
 
 import pytest
-from app_workers.config_worker import app
 from typer.testing import CliRunner
 
+from app_workers.config_worker import app
 from core.config import Configuration
 from core.services import ConfigurationService
 

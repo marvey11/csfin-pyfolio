@@ -6,16 +6,16 @@ import typer
 from rich.console import Console
 
 from core.config import InvalidConfigurationError
+from core.exceptions import RepositoryCorruptedError
 from core.models import StockMetadata
 from core.services import (
     ConfigurationService,
     JsonStockRepository,
-    RepositoryCorruptedError,
     StockService,
 )
 
 __version__ = "0.1.0"
-__updated__ = "2026-09-02"
+__updated__ = "2026-09-06"
 
 
 def main() -> None:

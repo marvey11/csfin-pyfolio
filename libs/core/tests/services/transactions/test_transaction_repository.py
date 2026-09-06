@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pytest
 
+from core.exceptions import RepositoryCorruptedError
 from core.models import StockMetadata, Transaction, TransactionType
 from core.services import (
     JsonTransactionRepository,
-    RepositoryCorruptedError,
     TransactionService,
 )
 
