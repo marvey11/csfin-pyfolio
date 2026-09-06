@@ -26,9 +26,10 @@ repos:
     hooks:
       - id: mypy
         name: mypy
-        entry: uv run --all-packages mypy .
+        entry: uv run --all-packages mypy
         language: system
-        pass_filenames: false
+        types: [python]
+        pass_filenames: true
 
       # Run test suite across workspace before push
       - id: pytest
@@ -36,4 +37,5 @@ repos:
         entry: uv run --all-packages pytest
         language: system
         pass_filenames: false
+        always_run: true
         stages: [pre-push]
