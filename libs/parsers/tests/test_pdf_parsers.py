@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
 from typing import ClassVar, Self, cast
@@ -68,19 +69,31 @@ def test_registry_returns_first_matching_parser() -> None:
 
 
 def test_scalable_parser_uses_stock_service_metadata() -> None:
-    stock = StockMetadata(isin="DE0007164600", name="SAP SE")
+    stock = StockMetadata(isin="FR0000121972", name="Schneider Electric")
     parser = ScalablePDFParser(make_stock_service(stock))
-    text = """Execution 01.02.2026 12:30:00
-    2 pc. 100.00 EUR 200.00 EUR
-    DE0007164600
-    Order fees 1.00 EUR
-    Debit 201.00 EUR
+    text = """Contract note
+    for client order
+    Type MARKET Order ID SCALabcdefghijkl
+    Execution 08.04.2026 10:19:19 Exchange ID 12345A67BCD89012
+    Type Security Quantity Price Amount
+    Sell Schneider Electric 1.399518 pc. 252.05 EUR 352.75 EUR
+    FR0000121972
+    Order fees -0.99 EUR
+    Credit 351.76 EUR
+    Contract note
+    Sell 1.399518 pc. Schneider Electric
+    Calculation of tax-relevant income
+    Type Note Amount
+    Profit 13.65 EUR
+    Considered order fees -3.34 EUR
+    To be taxed 0.00 EUR
     """
 
     transaction = parser.parse_trade_statement(text, TransactionType.BUY)
 
     assert transaction.stock is stock
-    assert transaction.stock.name == "SAP SE"
+    assert transaction.stock.name == "Schneider Electric"
+    assert transaction.date == datetime(2026, 4, 8, 10, 19, 19)
 
 
 def test_scalable_parser_rejects_unknown_stock() -> None:
@@ -96,21 +109,27 @@ def test_scalable_parser_rejects_unknown_stock() -> None:
 
 
 def test_scalable_parser_parses_dividend_statement() -> None:
-    stock = StockMetadata(isin="DE0007164600", name="SAP SE")
+    stock = StockMetadata(isin="US92826C8394", name="VISA Inc.")
     parser = ScalablePDFParser(make_stock_service(stock))
-    text = """ISIN DE0007164600
-    Entitled quantity 2
-    01.02.202603.02.2026 Credit
-    Credit 1.50 USD 3.00 2.70 EUR
-    USD / EUR 0.90
-    Total 2.40 EUR
+    text = """Dividend
+    for period 01.01.2026 - 31.12.2026
+    Entitled security VISA Inc.
+    ISIN US92826C8394
+    Entitled quantity 8
+    Ex day 11.08.2026
+    Booking Value date Type Amount / pcs. Entitled quantity Total amount
+    Exchange rate
+    31.08.202601.09.2026 Credit 0.67 USD 8 4.62 EUR
+    USD / EUR 1.1608
+    Foreign withholding tax -1.39 EUR
+    Total 3.23 EUR
     """
 
     transaction = parser.parse_dividend_statement(text)
 
     assert transaction.transaction_type is TransactionType.DIVIDEND
-    assert transaction.stock.name == "SAP SE"
-    assert transaction.net_total == Decimal("2.40")
+    assert transaction.stock.name == "VISA Inc."
+    assert transaction.net_total == Decimal("3.23")
 
 
 def test_scalable_parser_rejects_unknown_document() -> None:
