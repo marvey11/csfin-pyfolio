@@ -6,7 +6,8 @@
 The workspace members are declared in the root `pyproject.toml`:
 
 - `libs/core`: shared domain models, configuration, repositories, and services.
-- `apps/app-workers`: Typer command-line workers for configuration and stocks.
+- `libs/parsers`: parsers for bank-specific documents, like transactions.
+- `apps/app-workers`: Typer command-line workers for configuration, stocks, and transactions.
 - `apps/pyfolio`: the main pyfolio application package.
 
 The repository uses a `src` layout. Import packages through their installed package
@@ -153,10 +154,11 @@ uv run pytest --collect-only
 ```
 
 Use `compileall` for a quick Python syntax check and `pytest --collect-only` to
-verify test discovery without executing tests. Also check the VS Code Problems
-view with Pylance enabled for every changed Python file and resolve reported
-errors before submitting the change. Pylance diagnostics complement, but do not
-replace, the workspace-wide mypy check.
+verify test discovery without executing tests.
+
+Also check the VS Code Problems view with Pylance enabled for every changed
+Python file and resolve reported errors before submitting the change. Pylance
+diagnostics complement -- but do not replace -- the workspace-wide mypy check.
 
 ## Change Workflow
 
