@@ -76,6 +76,7 @@ It runs these commands after installing dependencies:
 uv run ruff check .
 uv run ruff format --check .
 uv run --all-packages mypy .
+uv build --all-packages
 uv run --all-packages pytest
 ```
 
