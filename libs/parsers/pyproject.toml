@@ -7,7 +7,11 @@ authors = [
     { name = "Marco Wegner", email = "673439+marvey11@users.noreply.github.com" },
 ]
 requires-python = ">=3.12"
-dependencies = ["core", "pdfplumber>=0.11.10"]
+dependencies = [
+    "codescape-shared-pie",
+    "core",
+    "pdfplumber>=0.11.10",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -15,3 +19,4 @@ build-backend = "hatchling.build"
 
 [tool.uv.sources]
 core = { workspace = true }
+codescape-shared-pie = { git = "https://github.com/marvey11/codescape-shared-pie.git" }
