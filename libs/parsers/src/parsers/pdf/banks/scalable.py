@@ -9,6 +9,8 @@ from core.models import StockMetadata, Transaction, TransactionType
 from core.utils import as_money
 from parsers.pdf.base import BaseBankParser
 
+from .parser_util import get_parsed_decimal
+
 if TYPE_CHECKING:
     from core.services import StockService
     from parsers.pdf.document import PDFDocument
@@ -71,26 +73,12 @@ class ScalablePDFParser(BaseBankParser):
             raise ValueError("Failed to extract essential trade details (ISIN/Date).")
 
         exec_date = datetime.strptime(extracted["execution_time"], "%d.%m.%Y %H:%M:%S")
-        shares = Decimal(extracted["quantity"]) if extracted["quantity"] else None
-        price = (
-            Decimal(extracted["price_per_share"])
-            if extracted["price_per_share"]
-            else None
-        )
-        fees = (
-            abs(Decimal(extracted["order_fees"]))
-            if extracted["order_fees"]
-            else Decimal("0")
-        )
-        taxes = (
-            Decimal(extracted["to_be_taxed"])
-            if extracted["to_be_taxed"]
-            else Decimal("0")
-        )
-        net_tot = Decimal(extracted["net_total"]) if extracted["net_total"] else None
-        gross_tot = (
-            Decimal(extracted["gross_total"]) if extracted["gross_total"] else None
-        )
+        shares = get_parsed_decimal(extracted, "quantity")
+        price = get_parsed_decimal(extracted, "price_per_share")
+        fees = get_parsed_decimal(extracted, "order_fees", default=Decimal("0"))
+        taxes = get_parsed_decimal(extracted, "to_be_taxed", default=Decimal("0"))
+        net_tot = get_parsed_decimal(extracted, "net_total")
+        gross_tot = get_parsed_decimal(extracted, "gross_total")
 
         stock = self._get_stock(extracted["isin"])
 
@@ -142,20 +130,10 @@ class ScalablePDFParser(BaseBankParser):
         fx_match = re.search(patterns["exchange_rate"], text)
         fx_rate = Decimal(fx_match.group(2)) if fx_match else Decimal("1")
 
-        eligible_shares = (
-            Decimal(extracted["entitled_quantity"])
-            if extracted["entitled_quantity"]
-            else None
-        )
-        div_per_share = (
-            Decimal(extracted["dividend_per_share"])
-            if extracted["dividend_per_share"]
-            else None
-        )
-        gross_tot = (
-            Decimal(extracted["gross_amount"]) if extracted["gross_amount"] else None
-        )
-        net_tot = Decimal(extracted["net_amount"]) if extracted["net_amount"] else None
+        eligible_shares = get_parsed_decimal(extracted, "entitled_quantity")
+        div_per_share = get_parsed_decimal(extracted, "dividend_per_share")
+        gross_tot = get_parsed_decimal(extracted, "gross_amount")
+        net_tot = get_parsed_decimal(extracted, "net_amount")
 
         taxes = Decimal("0")
         if gross_tot is not None and net_tot is not None:

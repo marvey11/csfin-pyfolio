@@ -365,6 +365,11 @@ dev = [
 ]
 
 [[package]]
+name = "codescape-shared-pie"
+version = "0.1.0"
+source = { git = "https://github.com/marvey11/codescape-shared-pie.git#8e8b57062a5ed887fd0e8e520bebcda594246308" }
+
+[[package]]
 name = "colorama"
 version = "0.4.6"
 source = { registry = "https://pypi.org/simple" }
@@ -777,12 +782,14 @@ name = "parsers"
 version = "0.1.0"
 source = { editable = "libs/parsers" }
 dependencies = [
+    { name = "codescape-shared-pie" },
     { name = "core" },
     { name = "pdfplumber" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "codescape-shared-pie", git = "https://github.com/marvey11/codescape-shared-pie.git" },
     { name = "core", editable = "libs/core" },
     { name = "pdfplumber", specifier = ">=0.11.10" },
 ]
