@@ -1033,10 +1033,16 @@ version = "0.1.0"
 source = { editable = "apps/pyfolio" }
 dependencies = [
     { name = "core" },
+    { name = "rich" },
+    { name = "typer" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "core", editable = "libs/core" }]
+requires-dist = [
+    { name = "core", editable = "libs/core" },
+    { name = "rich", specifier = ">=14.3.3" },
+    { name = "typer", specifier = ">=0.27.2" },
+]
 
 [[package]]
 name = "pygments"
