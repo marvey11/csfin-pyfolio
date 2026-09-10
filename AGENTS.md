@@ -2,7 +2,7 @@
 
 ## Repository Overview
 
-`csfin-pyfolio` is a Python 3.12 uv workspace for a finance portfolio application.
+`codescape-pyfolio` is a Python 3.12 uv workspace for a finance portfolio application.
 The workspace members are declared in the root `pyproject.toml`:
 
 - `libs/core`: shared domain models, configuration, repositories, and services.
