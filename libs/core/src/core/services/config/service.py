@@ -28,6 +28,15 @@ class ConfigurationService:
         """Retrieve a configuration value by key."""
         return self._config.get(key, default)
 
+    def get_path(self, key: str, default: Path | None = None) -> Path | None:
+        """Retrieve a path-valued setting, expanding its user directory."""
+        value = self.get_value(key)
+        if value is None:
+            return default.expanduser().resolve() if default is not None else None
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(f"'{key}' must be a non-empty string path.")
+        return Path(value).expanduser().resolve()
+
     def set_value(
         self, key: str, value: ConfigurationValue, path: Path | None = None
     ) -> None:
