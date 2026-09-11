@@ -48,6 +48,33 @@ def test_from_json_invalid_corrupted(tmp_path: Path) -> None:
         Configuration.from_json(file_path)
 
 
+def test_from_json_invalid_path(tmp_path: Path) -> None:
+    file_path = tmp_path / "does_not_exist.json"
+    assert not file_path.exists()
+
+    with pytest.raises(FileNotFoundError, match="Configuration file not found"):
+        Configuration.from_json(file_path)
+
+
+def test_from_json_not_dict(tmp_path: Path) -> None:
+    file_path = tmp_path / "not_dict.json"
+    file_path.write_text(json.dumps([]))
+
+    with pytest.raises(
+        InvalidConfigurationError, match="Configuration root must be a JSON object"
+    ):
+        Configuration.from_json(file_path)
+
+
+def test_from_json_invalid_schema(tmp_path: Path) -> None:
+    file_path = tmp_path / "invalid_scgema.json"
+    # `version` is a string (and does not represent an integer, either)
+    file_path.write_text(json.dumps({"version": "1.23"}))
+
+    with pytest.raises(InvalidConfigurationError, match="Schema validation failed"):
+        Configuration.from_json(file_path)
+
+
 def test_from_json_version_mismatch(tmp_path: Path) -> None:
     file_path = tmp_path / "old_version.json"
     file_path.write_text(json.dumps({"version": 99, "config": {}}))
@@ -62,3 +89,20 @@ def test_get_and_set_dot_notation() -> None:
 
     assert config.get("app.server.port") == 8080
     assert config.get("app.missing", default="N/A") == "N/A"
+
+
+def test_get_and_set_overwrite() -> None:
+    """
+    Tests that existing values are overwritten by a `dict` if they weren't a `dict`
+    beforehand.
+    """
+    config = Configuration()
+    config.set("app.server", "machine.locahost")
+
+    assert config.get("app.server", "machine.localhost")
+
+    config.set("app.server.hostname", "machine")
+    config.set("app.server.port", 8080)
+
+    assert config.get("app.server.hostname") == "machine"
+    assert config.get("app.server.port") == 8080
