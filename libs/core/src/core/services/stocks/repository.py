@@ -26,8 +26,17 @@ StockDictAdapter = TypeAdapter(dict[str, StockMetadata])
 
 
 class JsonStockRepository:
-    def __init__(self, json_path: Path) -> None:
-        self.json_path = json_path.expanduser().resolve()
+    """Store a list of stock metadata entities."""
+
+    DEFAULT_DATA_PATH = Path("~/.codescape/pyfolio")
+    DEFAULT_STOCKS_METADATA_PATH = DEFAULT_DATA_PATH / "stock_metadata.json"
+
+    def __init__(self, json_path: Path | None = None) -> None:
+        self.json_path = (
+            (json_path if json_path is not None else self.DEFAULT_STOCKS_METADATA_PATH)
+            .expanduser()
+            .resolve()
+        )
         self._cache: dict[str, StockMetadata] | None = None
 
     def _get_data(self) -> dict[str, StockMetadata]:

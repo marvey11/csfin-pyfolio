@@ -11,7 +11,6 @@ from pydantic import TypeAdapter
 from core.exceptions import RepositoryCorruptedError
 from core.models import Transaction
 
-DEFAULT_TRANSACTIONS_PATH = Path("~/.codescape/pyfolio/transactions.json")
 TransactionListAdapter = TypeAdapter(list[Transaction])
 
 
@@ -32,8 +31,15 @@ class TransactionRepository(Protocol):
 class JsonTransactionRepository:
     """Store transactions in a validated JSON array."""
 
-    def __init__(self, json_path: Path) -> None:
-        self.json_path = json_path.expanduser().resolve()
+    DEFAULT_DATA_PATH = Path("~/.codescape/pyfolio")
+    DEFAULT_TRANSACTIONS_PATH = DEFAULT_DATA_PATH / "transactions.json"
+
+    def __init__(self, json_path: Path | None = None) -> None:
+        self.json_path = (
+            (json_path if json_path is not None else self.DEFAULT_TRANSACTIONS_PATH)
+            .expanduser()
+            .resolve()
+        )
         self._cache: list[Transaction] | None = None
 
     def _get_data(self) -> list[Transaction]:

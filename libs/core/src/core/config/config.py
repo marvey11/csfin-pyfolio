@@ -9,7 +9,6 @@ from pydantic import BaseModel, Field, ValidationError
 # Recursive type alias for configuration values
 type ConfigurationValue = str | int | dict[str, ConfigurationValue]
 
-DEFAULT_CONFIG_PATH = Path("~/.codescape/pyfolio/settings.json")
 CURRENT_SCHEMA_VERSION = 1
 
 
@@ -27,6 +26,9 @@ class ConfigurationSchema(BaseModel):
 class Configuration:
     """Encapsulates configuration state and file I/O operations."""
 
+    DEFAULT_DATA_PATH = Path("~/.codescape/pyfolio")
+    DEFAULT_CONFIG_PATH = DEFAULT_DATA_PATH / "settings.json"
+
     def __init__(self, config: dict[str, ConfigurationValue] | None = None) -> None:
         """Initialise Configuration with an empty dict or pre-populated config data."""
         self.config: dict[str, ConfigurationValue] = (
@@ -36,9 +38,9 @@ class Configuration:
     @classmethod
     def resolve_path(cls, path: Path | None = None) -> Path:
         """
-        Resolve config path, defaulting to DEFAULT_CONFIG_PATH and expanding user dir.
+        Resolve config path, defaulting to `DEFAULT_CONFIG_PATH` and expanding user dir.
         """
-        target_path = path if path is not None else DEFAULT_CONFIG_PATH
+        target_path = path if path is not None else cls.DEFAULT_CONFIG_PATH
         return target_path.expanduser().resolve()
 
     @classmethod
