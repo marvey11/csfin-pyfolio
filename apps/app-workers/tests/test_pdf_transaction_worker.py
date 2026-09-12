@@ -38,13 +38,15 @@ def test_parse_command_adds_transactions(
     pdf_path = tmp_path / "statement.pdf"
     pdf_path.touch()
 
-    def fake_get_service(_config_path: Path | None = None) -> Service:
+    def fake_get_transaction_service(_config_path: Path | None = None) -> Service:
         return Service()
 
     def fake_get_stock_service(_config_path: Path | None = None) -> object:
         return object()
 
-    monkeypatch.setattr(pdf_transaction_worker, "get_service", fake_get_service)
+    monkeypatch.setattr(
+        pdf_transaction_worker, "get_transaction_service", fake_get_transaction_service
+    )
     monkeypatch.setattr(
         pdf_transaction_worker, "get_stock_service", fake_get_stock_service
     )
@@ -57,7 +59,7 @@ def test_parse_command_adds_transactions(
     assert "Successfully added transaction" in result.output
 
 
-def test_get_service_uses_default_transaction_path(
+def test_get_transaction_service_uses_default_transaction_path(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     """The transaction service accepts a missing transactions path setting."""
@@ -65,7 +67,7 @@ def test_get_service_uses_default_transaction_path(
     config_path.write_text('{"version": 1, "config": {}}', encoding="utf-8")
     monkeypatch.setenv("HOME", str(tmp_path))
 
-    service = pdf_transaction_worker.get_service(config_path)
+    service = pdf_transaction_worker.get_transaction_service(config_path)
 
     assert service.list_transactions() == []
 

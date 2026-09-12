@@ -12,7 +12,7 @@ class RepositoryFactory:
         self._config_service = config_service
 
     def create_stock_metadata_repo(self) -> JsonStockRepository:
-        json_path = self._config_service.get_path("stock_metadata.json_path")
+        json_path = self._config_service.get_path("stocks.json_path")
         return JsonStockRepository(json_path)
 
     def create_transaction_repo(self) -> JsonTransactionRepository:

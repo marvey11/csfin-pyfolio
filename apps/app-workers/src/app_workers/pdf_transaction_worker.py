@@ -9,7 +9,6 @@ from core.config import InvalidConfigurationError
 from core.exceptions import RepositoryCorruptedError
 from core.services import (
     ConfigurationService,
-    JsonStockRepository,
     RepositoryFactory,
     StockService,
     TransactionService,
@@ -31,7 +30,7 @@ def main() -> None:
         console.print(f"Shutting down -- {dt.datetime.now().strftime('%x %X')}")
 
 
-def get_service(config_path: Path | None = None) -> TransactionService:
+def get_transaction_service(config_path: Path | None = None) -> TransactionService:
     """Load configuration and create a transaction service for its repository."""
 
     try:
@@ -58,10 +57,11 @@ def get_stock_service(config_path: Path | None = None) -> StockService:
         err_console.print(f"[bold red]Configuration Error:[/bold red] {err}")
         raise typer.Exit(code=1) from err
 
-    stocks_path_value = config_service.get_path("stocks.json_path")
+    factory = RepositoryFactory(config_service)
+    stock_metadata_repo = factory.create_stock_metadata_repo()
 
     try:
-        return StockService(JsonStockRepository(stocks_path_value))
+        return StockService(repository=stock_metadata_repo)
     except RepositoryCorruptedError as err:
         err_console.print(f"[bold red]Format Error:[/bold red] {err}")
         raise typer.Exit(code=1) from err
@@ -128,7 +128,7 @@ def parse(
 ) -> None:
     """Parse bank PDF statements and store their transactions."""
     config_path: Path | None = ctx.obj.get("config_path") if ctx.obj else None
-    transaction_service = get_service(config_path)
+    transaction_service = get_transaction_service(config_path)
     stock_service = get_stock_service(config_path)
     registry = BankParserRegistry()
     registry.register(ScalablePDFParser(stock_service))
