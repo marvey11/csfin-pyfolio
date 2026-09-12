@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 from typing import Annotated
 
@@ -9,35 +10,63 @@ from core.config import InvalidConfigurationError
 from core.exceptions import InsufficientSharesError, RepositoryCorruptedError
 from core.services import (
     ConfigurationService,
-    JsonPortfolioRepository,
-    JsonTransactionRepository,
     PortfolioService,
+    RepositoryFactory,
     TransactionService,
 )
 
-DEFAULT_PORTFOLIO_PATH = Path("~/.codescape/pyfolio/portfolio.json")
+__version__ = "0.1.0"
+__updated__ = "2026-09-12"
+
+
+def main() -> None:
+    """Run the Pyfolio command-line application."""
+
+    console.print(get_version_message())
+    console.print(f"Starting up -- {datetime.now().strftime('%x %X')}")
+
+    try:
+        app()
+    finally:
+        console.print(f"Shutting down -- {datetime.now().strftime('%x %X')}")
+
 
 app = typer.Typer(name="pyfolio", help="Portfolio tracker", no_args_is_help=True)
 console = Console()
 err_console = Console(stderr=True)
 
 
+def get_version_message(short: bool = False) -> str:
+    template = (
+        "stock-worker v{version} ({updated})"
+        if short
+        else "This is stock-worker version {version} (last updated {updated})"
+    )
+    return template.format(version=__version__, updated=__updated__)
+
+
+def version_callback(value: bool) -> None:
+    if value:
+        console.print(get_version_message(short=True))
+        raise typer.Exit()
+
+
 def get_service(config_path: Path | None = None) -> PortfolioService:
     """Load transaction and portfolio repositories from application settings."""
     try:
-        config = ConfigurationService.load(config_path)
-        transaction_path = config.get_path(
-            "transactions.json_path", Path("~/.codescape/pyfolio/transactions.json")
-        )
-        portfolio_path = config.get_path("portfolio.json_path", DEFAULT_PORTFOLIO_PATH)
-        if transaction_path is None or portfolio_path is None:
-            raise ValueError("'portfolio.json_path' must be configured.")
-        transaction_service = TransactionService(
-            JsonTransactionRepository(transaction_path)
-        )
-        return PortfolioService(
-            transaction_service, JsonPortfolioRepository(portfolio_path)
-        )
+        config_service = ConfigurationService.load(config_path)
+    except (FileNotFoundError, InvalidConfigurationError) as err:
+        err_console.print(f"[bold red]Configuration Error:[/bold red] {err}")
+        raise typer.Exit(code=1) from err
+
+    factory = RepositoryFactory(config_service)
+
+    transaction_repo = factory.create_transaction_repo()
+    portfolio_repo = factory.create_portfolio_repo()
+
+    try:
+        transaction_service = TransactionService(transaction_repo)
+        return PortfolioService(transaction_service, portfolio_repo)
     except (FileNotFoundError, InvalidConfigurationError, ValueError) as err:
         err_console.print(f"[bold red]Configuration Error:[/bold red] {err}")
         raise typer.Exit(code=1) from err
@@ -46,6 +75,15 @@ def get_service(config_path: Path | None = None) -> PortfolioService:
 @app.callback()
 def main_callback(
     ctx: typer.Context,
+    version: Annotated[
+        bool | None,
+        typer.Option(
+            "--version",
+            callback=version_callback,
+            is_eager=True,
+            help="Show application version and exit.",
+        ),
+    ] = None,
     config: Annotated[
         Path | None,
         typer.Option(
@@ -88,11 +126,6 @@ def portfolio(ctx: typer.Context) -> None:
             str(holding.average_buy_price),
         )
     console.print(table)
-
-
-def main() -> None:
-    """Run the Pyfolio command-line application."""
-    app()
 
 
 if __name__ == "__main__":

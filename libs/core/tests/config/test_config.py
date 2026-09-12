@@ -6,11 +6,7 @@ from typing import Any
 
 import pytest
 
-from core.config import (
-    DEFAULT_CONFIG_PATH,
-    Configuration,
-    InvalidConfigurationError,
-)
+from core.config import Configuration, InvalidConfigurationError
 
 
 def test_configuration_initialization() -> None:
@@ -24,7 +20,7 @@ def test_resolve_path_defaults(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
     monkeypatch.setenv("HOME", str(fake_home))
 
     resolved = Configuration.resolve_path()
-    assert resolved == DEFAULT_CONFIG_PATH.expanduser().resolve()
+    assert resolved == Configuration.DEFAULT_CONFIG_PATH.expanduser().resolve()
 
 
 def test_from_json_success(tmp_path: Path) -> None:

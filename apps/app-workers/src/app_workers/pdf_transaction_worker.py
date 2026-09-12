@@ -9,8 +9,7 @@ from core.config import InvalidConfigurationError
 from core.exceptions import RepositoryCorruptedError
 from core.services import (
     ConfigurationService,
-    JsonStockRepository,
-    JsonTransactionRepository,
+    RepositoryFactory,
     StockService,
     TransactionService,
 )
@@ -31,7 +30,7 @@ def main() -> None:
         console.print(f"Shutting down -- {dt.datetime.now().strftime('%x %X')}")
 
 
-def get_service(config_path: Path | None = None) -> TransactionService:
+def get_transaction_service(config_path: Path | None = None) -> TransactionService:
     """Load configuration and create a transaction service for its repository."""
 
     try:
@@ -40,22 +39,11 @@ def get_service(config_path: Path | None = None) -> TransactionService:
         err_console.print(f"[bold red]Configuration Error:[/bold red] {err}")
         raise typer.Exit(code=1) from err
 
-    transactions_path_value = config_service.get_value(
-        "transactions.json_path", "~/.codescape/pyfolio/transactions.json"
-    )
-    if (
-        not isinstance(transactions_path_value, str)
-        or not transactions_path_value.strip()
-    ):
-        error_message = "'transactions.json_path' must be a non-empty string."
-        err_console.print(f"[bold red]Configuration Error:[/bold red] {error_message}")
-        raise typer.Exit(code=1)
-
-    transactions_path = Path(transactions_path_value)
-    repo = JsonTransactionRepository(json_path=transactions_path)
+    factory = RepositoryFactory(config_service)
+    transaction_repo = factory.create_transaction_repo()
 
     try:
-        return TransactionService(repository=repo)
+        return TransactionService(repository=transaction_repo)
     except RepositoryCorruptedError as err:
         err_console.print(f"[bold red]Format Error:[/bold red] {err}")
         raise typer.Exit(code=1) from err
@@ -69,16 +57,11 @@ def get_stock_service(config_path: Path | None = None) -> StockService:
         err_console.print(f"[bold red]Configuration Error:[/bold red] {err}")
         raise typer.Exit(code=1) from err
 
-    stocks_path_value = config_service.get_value(
-        "stocks.json_path", "~/.codescape/pyfolio/stock_metadata.json"
-    )
-    if not isinstance(stocks_path_value, str) or not stocks_path_value.strip():
-        error_message = "'stocks.json_path' must be a non-empty string."
-        err_console.print(f"[bold red]Configuration Error:[/bold red] {error_message}")
-        raise typer.Exit(code=1)
+    factory = RepositoryFactory(config_service)
+    stock_metadata_repo = factory.create_stock_metadata_repo()
 
     try:
-        return StockService(JsonStockRepository(Path(stocks_path_value)))
+        return StockService(repository=stock_metadata_repo)
     except RepositoryCorruptedError as err:
         err_console.print(f"[bold red]Format Error:[/bold red] {err}")
         raise typer.Exit(code=1) from err
@@ -145,7 +128,7 @@ def parse(
 ) -> None:
     """Parse bank PDF statements and store their transactions."""
     config_path: Path | None = ctx.obj.get("config_path") if ctx.obj else None
-    transaction_service = get_service(config_path)
+    transaction_service = get_transaction_service(config_path)
     stock_service = get_stock_service(config_path)
     registry = BankParserRegistry()
     registry.register(ScalablePDFParser(stock_service))

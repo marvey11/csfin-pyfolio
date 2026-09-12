@@ -1,4 +1,5 @@
 from .config.service import ConfigurationService
+from .factory import RepositoryFactory
 from .portfolio import JsonPortfolioRepository, PortfolioRepository, PortfolioService
 from .stocks.repository import (
     JsonStockRepository,
@@ -15,6 +16,7 @@ __all__ = [
     "JsonTransactionRepository",
     "PortfolioRepository",
     "PortfolioService",
+    "RepositoryFactory",
     "StockRepository",
     "StockService",
     "TransactionRepository",

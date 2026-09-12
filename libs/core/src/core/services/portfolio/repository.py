@@ -11,7 +11,6 @@ from pydantic import TypeAdapter
 from core.exceptions import RepositoryCorruptedError
 from core.models import Portfolio, Transaction
 
-DEFAULT_PORTFOLIO_PATH = Path("~/.codescape/pyfolio/portfolio.json")
 PortfolioAdapter = TypeAdapter(Portfolio)
 
 
@@ -26,8 +25,15 @@ class PortfolioRepository(Protocol):
 class JsonPortfolioRepository:
     """Store a validated portfolio document and its transaction cache."""
 
-    def __init__(self, json_path: Path = DEFAULT_PORTFOLIO_PATH) -> None:
-        self.json_path = json_path.expanduser().resolve()
+    DEFAULT_DATA_PATH = Path("~/.codescape/pyfolio")
+    DEFAULT_PORTFOLIO_PATH = DEFAULT_DATA_PATH / "portfolio.json"
+
+    def __init__(self, json_path: Path | None = None) -> None:
+        self.json_path = (
+            (json_path if json_path is not None else self.DEFAULT_PORTFOLIO_PATH)
+            .expanduser()
+            .resolve()
+        )
 
     def load(self) -> Portfolio | None:
         """Load the cached portfolio, returning ``None`` for an empty file."""

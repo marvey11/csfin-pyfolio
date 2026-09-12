@@ -10,7 +10,7 @@ from core.exceptions import RepositoryCorruptedError
 from core.models import StockMetadata
 from core.services import (
     ConfigurationService,
-    JsonStockRepository,
+    RepositoryFactory,
     StockService,
 )
 
@@ -60,17 +60,11 @@ def get_service(config_path: Path | None = None) -> StockService:
         err_console.print(f"[bold red]Configuration Error:[/bold red] {err}")
         raise typer.Exit(code=1) from err
 
-    stock_metadata_value = config_service.get_value("stocks.json_path")
-    if not isinstance(stock_metadata_value, str) or not stock_metadata_value.strip():
-        error_message = "'stocks.json_path' must be a non-empty string."
-        err_console.print(f"[bold red]Configuration Error:[/bold red] {error_message}")
-        raise typer.Exit(code=1)
-
-    stock_metadata_path = Path(stock_metadata_value)
-    repo = JsonStockRepository(json_path=stock_metadata_path)
+    factory = RepositoryFactory(config_service)
+    stock_repo = factory.create_stock_metadata_repo()
 
     try:
-        return StockService(repo)
+        return StockService(repository=stock_repo)
     except RepositoryCorruptedError as err:
         err_console.print(f"[bold red]Format Error:[/bold red] {err}")
         raise typer.Exit(code=1) from err
